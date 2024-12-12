@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package master;
+
+option go_package = "proto/";
+
+service Master {
+  rpc RegisterSlave (RegisterSlaveRequest) returns (RegisterSlaveResponse) {}
+}
+
+message RegisterSlaveRequest {
+  string name = 1;
+}
+
+message RegisterSlaveResponse {
+  string message = 1;
+}
