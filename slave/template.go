@@ -46,7 +46,7 @@ func (tmpl *templateManager) syncTemplates() error {
 		return fmt.Errorf("could not get absolute path for template directory: %w", err)
 	}
 	url := fmt.Sprintf("rsync://%s/templates", tmpl.s.cfg.FileServerHost)
-	cmd := exec.Command("rsync", "-a", "--port", tmpl.s.cfg.FileServerPort, url, path)
+	cmd := exec.Command("rsync", "-a", "--delete", "--port", tmpl.s.cfg.FileServerPort, url, path)
 	cmd.Stdout = os.Stdout
 	err = cmd.Run()
 	if err != nil {

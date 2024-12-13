@@ -14,6 +14,7 @@ type slave struct {
 	cfg           *config
 	authenticated bool
 	tmpl          *templateManager
+	svcm          *serviceManager
 }
 
 type config struct {
@@ -26,8 +27,7 @@ type config struct {
 }
 
 type handler struct {
-	conn net.Conn
-	s    *slave
+	s *slave
 }
 
 func main() {
@@ -61,6 +61,11 @@ func main() {
 		log.Fatalf("error loading templates: %v", err)
 	}
 
+	s.svcm, err = newServiceManager(&s)
+	if err != nil {
+		log.Fatalf("error initializing service manager: %v", err)
+	}
+
 	log.Printf("connecting to master at %s", s.cfg.MasterAddr)
 	conn, err := net.Dial("tcp", s.cfg.MasterAddr)
 	if err != nil {
@@ -88,7 +93,8 @@ func main() {
 		}
 	}()
 
-	h := &handler{conn: conn, s: &s}
+	h := &handler{s: &s}
+	//err = common.HandleConnection(io.TeeReader(conn, os.Stdout), h)
 	err = common.HandleConnection(conn, h)
 	if err != nil {
 		log.Fatalf("connection error: %v", err)
@@ -106,9 +112,20 @@ func (h *handler) HandlePacket(packetType common.PacketType, data json.RawMessag
 		var p common.PacketAuthFailed
 		err := json.Unmarshal(data, &p)
 		if err != nil {
-			return fmt.Errorf("error unmarshalling packet: %v", err)
+			return fmt.Errorf("error unmarshalling packet: %w", err)
 		}
 		return fmt.Errorf("authentication failed: %s", p.Message)
+	case common.PacketTypeScheduleServiceRequest:
+		var p common.PacketScheduleServiceRequest
+		err := json.Unmarshal(data, &p)
+		if err != nil {
+			return fmt.Errorf("error unmarshalling packet: %w", err)
+		}
+		log.Printf("asked to schedule service %s", p.Name)
+		err = h.s.svcm.createService(p.Name, p.Group)
+		if err != nil {
+			log.Printf("failed to schedule service %s: %v", p.Name, err)
+		}
 	}
 	return nil
 }

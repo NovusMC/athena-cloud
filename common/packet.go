@@ -2,18 +2,18 @@ package common
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"io"
 	"net"
 )
 
 type PacketType string
 
 const (
-	PacketTypeAuthenticate    PacketType = "authenticate"
-	PacketTypeAuthSuccess     PacketType = "auth_success"
-	PacketTypeAuthFailed      PacketType = "auth_failed"
-	PacketTypeScheduleService PacketType = "schedule_service"
+	PacketTypeAuthenticate           PacketType = "authenticate"
+	PacketTypeAuthSuccess            PacketType = "auth_success"
+	PacketTypeAuthFailed             PacketType = "auth_failed"
+	PacketTypeScheduleServiceRequest PacketType = "schedule_service_request"
 )
 
 type Packet struct {
@@ -31,7 +31,9 @@ type PacketAuthFailed struct {
 	Message string `json:"message"`
 }
 
-type PacketScheduleService struct {
+type PacketScheduleServiceRequest struct {
+	Name  string     `json:"name"`
+	Group *GroupInfo `json:"group"`
 }
 
 func SendPacket(conn net.Conn, packetType PacketType, data any) error {
@@ -54,13 +56,12 @@ type PacketHandler interface {
 	HandlePacket(packetType PacketType, data json.RawMessage) error
 }
 
-func HandleConnection(conn net.Conn, handler PacketHandler) error {
+func HandleConnection(conn io.Reader, handler PacketHandler) error {
 	decoder := json.NewDecoder(conn)
 	for {
 		var p Packet
 		err := decoder.Decode(&p)
 		if err != nil {
-			err = errors.Join(err, conn.Close())
 			return err
 		}
 

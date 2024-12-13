@@ -13,6 +13,7 @@ type slaveManager struct {
 }
 
 type slave struct {
+	conn          net.Conn
 	name          string
 	authenticated bool
 	memory        int
@@ -21,7 +22,7 @@ type slave struct {
 
 type slaveHandler struct {
 	m     *master
-	slave slave
+	slave *slave
 	conn  net.Conn
 }
 
@@ -43,14 +44,12 @@ func (h *slaveHandler) HandlePacket(packetType common.PacketType, data json.RawM
 			return err
 		}
 		if auth.SecretKey != h.m.cfg.SecretKey {
-			data, _ := json.Marshal(common.PacketAuthFailed{Message: "invalid secret key"})
-			_ = common.SendPacket(h.conn, common.PacketTypeAuthFailed, data)
+			_ = common.SendPacket(h.conn, common.PacketTypeAuthFailed, common.PacketAuthFailed{Message: "invalid secret key"})
 			return fmt.Errorf("invalid secret key")
 		}
 		for _, slv := range h.m.sm.slaves {
 			if slv.name == auth.SlaveName {
-				data, _ := json.Marshal(common.PacketAuthFailed{Message: "slave with name already exists"})
-				_ = common.SendPacket(h.conn, common.PacketTypeAuthFailed, data)
+				_ = common.SendPacket(h.conn, common.PacketTypeAuthFailed, common.PacketAuthFailed{Message: "slave with name already exists"})
 				return fmt.Errorf("slave with name %s already exists", auth.SlaveName)
 			}
 		}
@@ -58,7 +57,7 @@ func (h *slaveHandler) HandlePacket(packetType common.PacketType, data json.RawM
 		h.slave.memory = auth.Memory
 		h.slave.freeMemory = auth.Memory
 		h.slave.authenticated = true
-		h.m.sm.slaves = append(h.m.sm.slaves, &h.slave)
+		h.m.sm.slaves = append(h.m.sm.slaves, h.slave)
 		log.Printf("slave %q authenticated", h.slave.name)
 		return common.SendPacket(h.conn, common.PacketTypeAuthenticate, nil)
 	}
@@ -69,5 +68,8 @@ func (h *slaveHandler) HandlePacket(packetType common.PacketType, data json.RawM
 var _ common.PacketHandler = &slaveHandler{}
 
 func (s *slave) schedule(svc *service) {
-
+	_ = common.SendPacket(s.conn, common.PacketTypeScheduleServiceRequest, common.PacketScheduleServiceRequest{
+		Name:  svc.name,
+		Group: svc.group.info,
+	})
 }

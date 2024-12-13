@@ -80,7 +80,7 @@ func main() {
 				continue
 			}
 			log.Printf("new connection from %s", conn.RemoteAddr())
-			h := &slaveHandler{m: &m, conn: conn}
+			h := &slaveHandler{m: &m, conn: conn, slave: &slave{conn: conn}}
 			go func() {
 				err = common.HandleConnection(conn, h)
 				if err != nil && !errors.Is(err, io.EOF) {
