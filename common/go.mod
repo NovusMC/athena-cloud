@@ -1,4 +1,4 @@
-module proto
+module common
 
 go 1.23.2
 

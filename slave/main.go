@@ -1,79 +1,114 @@
 package main
 
 import (
-	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
 	"log"
-	"os"
+	"net"
 	"time"
 
-	"proto"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"gopkg.in/yaml.v3"
+	"common"
 )
 
+type slave struct {
+	cfg           *config
+	authenticated bool
+	tmpl          *templateManager
+}
+
 type config struct {
-	MasterAddr string `yaml:"master_addr"`
+	Name           string `yaml:"name"`
+	MasterAddr     string `yaml:"master_addr"`
+	FileServerHost string `yaml:"file_server_host"`
+	FileServerPort string `yaml:"file_server_port"`
+	SecretKey      string `yaml:"secret_key"`
+	Memory         int    `yaml:"memory"`
+}
+
+type handler struct {
+	conn net.Conn
+	s    *slave
 }
 
 func main() {
-	cfg, err := readConfig()
+	fmt.Print(common.Header)
+	log.Printf("starting Athena-Slave %s", common.Version)
+
+	var (
+		err error
+		s   slave
+	)
+
+	err = checkForRsync()
 	if err != nil {
-		log.Fatalf("error loading config: %v", cfg)
+		log.Fatalf("%v", err)
 	}
 
-	log.Printf("connecting to master at %q", cfg.MasterAddr)
+	s.cfg, err = common.ReadConfig("slave.yaml", config{
+		Name:           "slave-01",
+		MasterAddr:     "127.0.0.1:5000",
+		FileServerHost: "127.0.0.1",
+		FileServerPort: "5001",
+		SecretKey:      "",
+		Memory:         1024,
+	})
+	if err != nil {
+		log.Fatalf("error loading config: %v", err)
+	}
 
-	conn, err := grpc.NewClient(cfg.MasterAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	s.tmpl, err = newTemplateManager(&s)
+	if err != nil {
+		log.Fatalf("error loading templates: %v", err)
+	}
+
+	log.Printf("connecting to master at %s", s.cfg.MasterAddr)
+	conn, err := net.Dial("tcp", s.cfg.MasterAddr)
 	if err != nil {
 		log.Fatalf("could not connect to master: %v", err)
 	}
-	defer conn.Close()
+	defer func() {
+		_ = conn.Close()
+	}()
+	log.Println("connected to master")
 
-	c := proto.NewMasterClient(conn)
-
-	// Contact the server and print out its response.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	r, err := c.RegisterSlave(ctx, &proto.RegisterSlaveRequest{Name: "moin"})
+	err = common.SendPacket(conn, common.PacketTypeAuthenticate, common.PacketAuthenticate{
+		SlaveName: s.cfg.Name,
+		SecretKey: s.cfg.SecretKey,
+		Memory:    s.cfg.Memory,
+	})
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Fatalf("could not authenticate with master: %v", err)
 	}
-	log.Printf("Greeting: %s", r.GetMessage())
+
+	go func() {
+		time.Sleep(10 * time.Second)
+		if !s.authenticated {
+			log.Println("authentication with master timed out")
+			_ = conn.Close()
+		}
+	}()
+
+	h := &handler{conn: conn, s: &s}
+	err = common.HandleConnection(conn, h)
+	if err != nil {
+		log.Fatalf("connection error: %v", err)
+	}
+	log.Printf("disconnecting from master at %s", conn.RemoteAddr())
+	_ = conn.Close()
 }
 
-func readConfig() (*config, error) {
-	configFile := "slave.yaml"
-	var cfg config
-
-	bytes, err := os.ReadFile(configFile)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-
-			bytes, err = yaml.Marshal(cfg)
-			if err != nil {
-				return nil, fmt.Errorf("error marshaling empty config: %w", err)
-			}
-
-			err = os.WriteFile(configFile, bytes, 0644)
-			if err != nil {
-				return nil, fmt.Errorf("error writing config file: %w", err)
-			}
-
-			os.Exit(1)
-			return nil, nil
+func (h *handler) HandlePacket(packetType common.PacketType, data json.RawMessage) error {
+	switch packetType {
+	case common.PacketTypeAuthenticate:
+		h.s.authenticated = true
+		log.Println("authenticated with master")
+	case common.PacketTypeAuthFailed:
+		var p common.PacketAuthFailed
+		err := json.Unmarshal(data, &p)
+		if err != nil {
+			return fmt.Errorf("error unmarshalling packet: %v", err)
 		}
-		return nil, fmt.Errorf("error reading config file: %w", err)
+		return fmt.Errorf("authentication failed: %s", p.Message)
 	}
-
-	err = yaml.Unmarshal(bytes, &cfg)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing config file: %w", err)
-	}
-
-	return &cfg, nil
+	return nil
 }

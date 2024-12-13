@@ -4,51 +4,106 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
-	"os"
 	"strings"
+	"time"
 
-	"proto"
+	"common"
 
 	"github.com/c-bata/go-prompt"
-	"github.com/urfave/cli/v3"
-	"google.golang.org/grpc"
-
-	"gopkg.in/yaml.v3"
 )
 
+type master struct {
+	cfg   *config
+	gm    *groupManager
+	sm    *slaveManager
+	sched *scheduler
+	tmpl  *templateManager
+}
+
 type config struct {
-	BindAddr string `yaml:"bind_addr"`
-}
-
-type server struct {
-	proto.UnimplementedMasterServer
-}
-
-func (server) RegisterSlave(context.Context, *proto.RegisterSlaveRequest) (*proto.RegisterSlaveResponse, error) {
-	return &proto.RegisterSlaveResponse{Message: "moin"}, nil
+	BindAddr           string `yaml:"bind_addr"`
+	FileServerBindAddr string `yaml:"file_server_bind_addr"`
+	SecretKey          string `yaml:"secret_key"`
 }
 
 func main() {
-	cfg, err := readConfig()
+	fmt.Print(common.Header)
+	log.Printf("starting Athena-Master %s", common.Version)
+
+	var (
+		err error
+		m   master
+	)
+
+	m.cfg, err = common.ReadConfig("master.yaml", config{
+		BindAddr:           ":5000",
+		FileServerBindAddr: ":5001",
+		SecretKey:          common.GenerateRandomHex(32),
+	})
 	if err != nil {
-		log.Fatalf("error loading config: %v", cfg)
+		log.Fatalf("error loading config: %v", m.cfg)
 	}
 
-	lis, err := net.Listen("tcp", cfg.BindAddr)
+	m.gm, err = newGroupManager()
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+
+	m.tmpl, err = newTemplateManager(&m)
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+
+	m.sm = newSlaveManager()
+	m.sched = newScheduler(&m)
+
+	lis, err := net.Listen("tcp", m.cfg.BindAddr)
 	if err != nil {
 		log.Fatalf("failed starting server: %v", err)
 	}
-	log.Printf("listening on %q", cfg.BindAddr)
+	defer lis.Close()
+	log.Printf("listening on %q", m.cfg.BindAddr)
 
-	s := grpc.NewServer()
-	proto.RegisterMasterServer(s, server{})
+	err = m.tmpl.startFileServer()
+	if err != nil {
+		log.Fatalf("failed starting file server: %v", err)
+	}
+
 	go func() {
-		if err = s.Serve(lis); err != nil {
-			log.Fatalf("failed to serve: %v", err)
+		for {
+			conn, err := lis.Accept()
+			if err != nil {
+				log.Printf("connection error: %v", err)
+				continue
+			}
+			log.Printf("new connection from %s", conn.RemoteAddr())
+			h := &slaveHandler{m: &m, conn: conn}
+			go func() {
+				err = common.HandleConnection(conn, h)
+				if err != nil && !errors.Is(err, io.EOF) {
+					log.Printf("connection error: %v", err)
+				}
+				_ = conn.Close()
+				if h.slave.authenticated {
+					log.Printf("slave %q disconnected", h.slave.name)
+				} else {
+					log.Printf("authentication with slave %s failed", conn.RemoteAddr())
+				}
+			}()
 		}
 	}()
+
+	go func() {
+		t := time.NewTicker(time.Second)
+		for range t.C {
+			m.sched.scheduleServices()
+		}
+	}()
+
+	cmd := newCommand(&m)
 
 	var history []string
 	for {
@@ -60,48 +115,11 @@ func main() {
 			history = history[len(history)-100:]
 		}
 
-		cmd := &cli.Command{
-			Name:  "boom",
-			Usage: "make an explosive entrance",
-			Action: func(context.Context, *cli.Command) error {
-				fmt.Println("boom! I say!")
-				return nil
-			},
+		if in == "" {
+			continue
 		}
 
 		args := strings.Split(in, " ")
-		cmd.Run(context.Background(), args)
+		_ = cmd.Run(context.Background(), append([]string{""}, args...))
 	}
-}
-
-func readConfig() (*config, error) {
-	configFile := "master.yaml"
-	var cfg config
-
-	bytes, err := os.ReadFile(configFile)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-
-			bytes, err = yaml.Marshal(cfg)
-			if err != nil {
-				return nil, fmt.Errorf("error marshaling empty config: %w", err)
-			}
-
-			err = os.WriteFile(configFile, bytes, 0644)
-			if err != nil {
-				return nil, fmt.Errorf("error writing config file: %w", err)
-			}
-
-			os.Exit(1)
-			return nil, nil
-		}
-		return nil, fmt.Errorf("error reading config file: %w", err)
-	}
-
-	err = yaml.Unmarshal(bytes, &cfg)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing config file: %w", err)
-	}
-
-	return &cfg, nil
 }
