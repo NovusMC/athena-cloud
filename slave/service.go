@@ -32,7 +32,11 @@ func newServiceManager(s *slave) (*serviceManager, error) {
 }
 
 func (svcm *serviceManager) init() error {
-	err := os.MkdirAll(svcm.tmpDir, 0755)
+	err := os.RemoveAll(svcm.tmpDir)
+	if err != nil {
+		return fmt.Errorf("failed to remove temp directory: %w", err)
+	}
+	err = os.MkdirAll(svcm.tmpDir, 0755)
 	if err != nil {
 		return fmt.Errorf("failed to create temp directory: %w", err)
 	}

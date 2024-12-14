@@ -41,7 +41,7 @@ func (tmpl *templateManager) init() error {
 }
 
 func (tmpl *templateManager) downloadTemplate(name string) error {
-	path, err := filepath.Abs(filepath.Join(tmpl.templateDir, name))
+	path, err := filepath.Abs(tmpl.templateDir)
 	if err != nil {
 		return fmt.Errorf("could not get absolute path for template directory: %w", err)
 	}
