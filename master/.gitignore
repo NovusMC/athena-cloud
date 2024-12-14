@@ -1,4 +1,5 @@
 master.yaml
 groups/
 templates/
+assets/
 .athena_history

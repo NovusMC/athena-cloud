@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/fatih/color"
 	"io"
 	"log"
 	"net"
+	"protocol"
 	"strings"
 	"time"
 
@@ -62,7 +62,7 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 
-	m.sm = newSlaveManager()
+	m.sm = newSlaveManager(&m)
 	m.sched = newScheduler(&m)
 
 	lis, err := net.Listen("tcp", m.cfg.BindAddr)
@@ -70,7 +70,7 @@ func main() {
 		log.Fatalf("failed starting server: %v", err)
 	}
 	defer lis.Close()
-	log.Printf("listening on %q", m.cfg.BindAddr)
+	log.Printf("listening on %s", m.cfg.BindAddr)
 
 	err = m.tmpl.startFileServer()
 	if err != nil {
@@ -85,19 +85,27 @@ func main() {
 				continue
 			}
 			log.Printf("new connection from %s", conn.RemoteAddr())
-			h := &slaveHandler{m: &m, conn: conn, slave: &slave{conn: conn}}
+			slv := m.sm.newSlave(conn)
 			go func() {
-				err = common.HandleConnection(conn, h)
-				if err != nil && !errors.Is(err, io.EOF) {
-					log.Printf("connection error: %v", err)
+				for {
+					p, err := protocol.ReadPacket(conn)
+					if err != nil {
+						log.Printf("failed reading packet: %v", err)
+						break
+					}
+					err = slv.handlePacket(p)
+					if err != nil {
+						log.Printf("failed handling packet: %v", err)
+						break
+					}
 				}
 				_ = conn.Close()
-				if h.slave.authenticated {
-					log.Printf("slave %q disconnected", h.slave.name)
+				if slv.authenticated {
+					log.Printf("slave %q disconnected", slv.name)
 				} else {
 					log.Printf("authentication with slave %s failed", conn.RemoteAddr())
 				}
-				m.sm.removeSlave(h.slave)
+				m.sm.removeSlave(slv)
 			}()
 		}
 	}()

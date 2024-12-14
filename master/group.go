@@ -1,17 +1,17 @@
 package main
 
 import (
-	"common"
 	"fmt"
 	"github.com/goccy/go-yaml"
 	"os"
 	"path"
+	"protocol"
 	"strings"
 	"sync"
 )
 
 type group struct {
-	*common.GroupInfo
+	*protocol.Group
 	services []*service
 	mu       sync.RWMutex
 }
@@ -55,19 +55,19 @@ func (gm *groupManager) loadGroups() error {
 		if err != nil {
 			return fmt.Errorf("cannot read group file: %w", err)
 		}
-		var info common.GroupInfo
-		err = yaml.Unmarshal(b, &info)
+		var g protocol.Group
+		err = yaml.Unmarshal(b, &g)
 		if err != nil {
 			return fmt.Errorf("cannot parse group file at %q: %w", fileName, err)
 		}
-		err = info.Validate()
+		err = g.Validate()
 		if err != nil {
 			return fmt.Errorf("invalid group file %q: %w", fileName, err)
 		}
-		if f.Name() != info.Name+".yaml" {
-			return fmt.Errorf("invalid group file: %q: file name must be %q", f.Name(), info.Name+".yaml")
+		if f.Name() != g.Name+".yaml" {
+			return fmt.Errorf("invalid group file: %q: file name must be %q", f.Name(), g.Name+".yaml")
 		}
-		groups = append(groups, &group{GroupInfo: &info})
+		groups = append(groups, &group{Group: &g})
 	}
 
 	gm.mu.Lock()
@@ -76,7 +76,7 @@ func (gm *groupManager) loadGroups() error {
 	return nil
 }
 
-func (gm *groupManager) saveGroup(g *common.GroupInfo) error {
+func (gm *groupManager) saveGroup(g *protocol.Group) error {
 	err := g.Validate()
 	if err != nil {
 		return fmt.Errorf("invalid group: %w", err)
@@ -92,24 +92,24 @@ func (gm *groupManager) saveGroup(g *common.GroupInfo) error {
 	return nil
 }
 
-func (gm *groupManager) createGroup(info *common.GroupInfo) error {
-	err := info.Validate()
+func (gm *groupManager) createGroup(g *protocol.Group) error {
+	err := g.Validate()
 	if err != nil {
 		return fmt.Errorf("invalid group: %w", err)
 	}
 	for _, g := range gm.groups {
-		if g.Name == info.Name {
-			return fmt.Errorf("group %q already exists", info.Name)
+		if g.Name == g.Name {
+			return fmt.Errorf("group %q already exists", g.Name)
 		}
 	}
-	err = gm.saveGroup(info)
+	err = gm.saveGroup(g)
 	if err != nil {
 		return fmt.Errorf("cannot save group: %w", err)
 	}
 	gm.mu.Lock()
-	gm.groups = append(gm.groups, &group{GroupInfo: info})
+	gm.groups = append(gm.groups, &group{Group: g})
 	gm.mu.Unlock()
-	err = gm.m.tmpl.createTemplateDir(info.Name)
+	err = gm.m.tmpl.createTemplateDir(g.Name)
 	if err != nil {
 		return fmt.Errorf("failed to create template directory: %w", err)
 	}

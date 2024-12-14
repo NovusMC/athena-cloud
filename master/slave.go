@@ -1,91 +1,89 @@
 package main
 
 import (
-	"common"
-	"encoding/json"
 	"fmt"
+	"google.golang.org/protobuf/proto"
 	"log"
 	"net"
+	"protocol"
 	"slices"
 	"sync"
 )
 
 type slaveManager struct {
+	m      *master
 	slaves []*slave
 	mu     sync.RWMutex
 }
 
 type slave struct {
 	conn          net.Conn
+	m             *master
 	name          string
 	authenticated bool
-	memory        int
-	freeMemory    int
+	memory        int32
+	freeMemory    int32
 }
 
-type slaveHandler struct {
-	m     *master
-	slave *slave
-	conn  net.Conn
+func newSlaveManager(m *master) *slaveManager {
+	return &slaveManager{m: m}
 }
 
-func newSlaveManager() *slaveManager {
-	return &slaveManager{}
+func (sm *slaveManager) newSlave(conn net.Conn) *slave {
+	slv := &slave{conn: conn, m: sm.m}
+	sm.mu.Lock()
+	sm.slaves = append(sm.slaves, slv)
+	sm.mu.Unlock()
+	return slv
 }
 
-func (h *slaveHandler) HandlePacket(packetType common.PacketType, data json.RawMessage) error {
-
-	if !h.slave.authenticated && packetType != common.PacketTypeAuthenticate {
-		return fmt.Errorf("slave not authenticated")
-	}
-
-	switch packetType {
-	case common.PacketTypeAuthenticate:
-		var auth common.PacketAuthenticate
-		err := json.Unmarshal(data, &auth)
-		if err != nil {
-			return err
-		}
-		if auth.SecretKey != h.m.cfg.SecretKey {
-			_ = common.SendPacket(h.conn, common.PacketTypeAuthFailed, common.PacketAuthFailed{Message: "invalid secret key"})
+func (s *slave) handlePacketPreAuth(p proto.Message) error {
+	switch p := p.(type) {
+	case *protocol.PacketAuthenticate:
+		if p.SecretKey != s.m.cfg.SecretKey {
+			_ = protocol.SendPacket(s.conn, &protocol.PacketAuthFailed{Message: "invalid secret key"})
 			return fmt.Errorf("invalid secret key")
 		}
-		for _, slv := range h.m.sm.slaves {
-			if slv.name == auth.SlaveName {
-				_ = common.SendPacket(h.conn, common.PacketTypeAuthFailed, common.PacketAuthFailed{Message: "slave with name already exists"})
-				return fmt.Errorf("slave with name %s already exists", auth.SlaveName)
-			}
+		slv := s.m.sm.getSlave(p.SlaveName)
+		if slv != nil {
+			_ = protocol.SendPacket(s.conn, &protocol.PacketAuthFailed{Message: "slave with name already exists"})
+			return fmt.Errorf("slave with name %q already exists", p.SlaveName)
 		}
-		h.slave.name = auth.SlaveName
-		h.slave.memory = auth.Memory
-		h.slave.freeMemory = auth.Memory
-		h.slave.authenticated = true
-		h.m.sm.slaves = append(h.m.sm.slaves, h.slave)
-		log.Printf("slave %q authenticated", h.slave.name)
-		return common.SendPacket(h.conn, common.PacketTypeAuthenticate, nil)
-
-	case common.PacketTypeServiceStartFailed:
-		var p common.PacketServiceStartFailed
-		err := json.Unmarshal(data, &p)
+		s.name = p.SlaveName
+		s.memory = p.Memory
+		s.freeMemory = p.Memory
+		s.authenticated = true
+		log.Printf("slave %q successfully authenticated", s.name)
+		err := protocol.SendPacket(s.conn, &protocol.PacketAuthSuccess{})
 		if err != nil {
-			return fmt.Errorf("failed to unmarshal packet: %w", err)
+			return fmt.Errorf("failed to send auth success packet: %v", err)
 		}
-		log.Printf("slave %q failed to start service %q: %s", h.slave.name, p.ServiceName, p.Message)
-		svc := h.m.sched.getService(p.ServiceName)
-		if svc != nil {
-			h.m.sched.deleteService(svc)
-		}
+	default:
+		return fmt.Errorf("slave not authenticated")
 	}
-
 	return nil
 }
 
-var _ common.PacketHandler = &slaveHandler{}
+func (s *slave) handlePacket(p proto.Message) error {
+	if !s.authenticated {
+		return s.handlePacketPreAuth(p)
+	}
+
+	switch p := p.(type) {
+	case *protocol.PacketServiceStartFailed:
+		log.Printf("slave %q failed to start service %q: %s", s.name, p.ServiceName, p.Message)
+		svc := s.m.sched.getService(p.ServiceName)
+		if svc != nil {
+			s.m.sched.deleteService(svc)
+		}
+	}
+	return nil
+}
 
 func (s *slave) schedule(svc *service) {
-	_ = common.SendPacket(s.conn, common.PacketTypeScheduleServiceRequest, common.PacketScheduleServiceRequest{
-		Service: svc.ServiceInfo,
-		Group:   svc.g.GroupInfo,
+	_ = protocol.SendPacket(s.conn, &protocol.PacketScheduleServiceRequest{
+		Service: svc.Service,
+		Group:   svc.g.Group,
 	})
 }
 
@@ -94,4 +92,15 @@ func (sm *slaveManager) removeSlave(s *slave) {
 	defer sm.mu.Unlock()
 	idx := slices.Index(sm.slaves, s)
 	sm.slaves = slices.Delete(sm.slaves, idx, idx+1)
+}
+
+func (sm *slaveManager) getSlave(name string) *slave {
+	sm.mu.RLock()
+	defer sm.mu.RUnlock()
+	for _, s := range sm.slaves {
+		if s.name == name {
+			return s
+		}
+	}
+	return nil
 }

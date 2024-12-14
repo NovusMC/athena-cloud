@@ -1,13 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/fatih/color"
-	"io"
+	"google.golang.org/protobuf/proto"
 	"log"
 	"net"
-	"os"
+	"protocol"
 	"strings"
 	"time"
 
@@ -15,6 +14,7 @@ import (
 )
 
 type slave struct {
+	conn          net.Conn
 	cfg           *config
 	authenticated bool
 	tmpl          *templateManager
@@ -27,12 +27,7 @@ type config struct {
 	FileServerHost string `yaml:"file_server_host"`
 	FileServerPort string `yaml:"file_server_port"`
 	SecretKey      string `yaml:"secret_key"`
-	Memory         int    `yaml:"memory"`
-}
-
-type handler struct {
-	conn net.Conn
-	s    *slave
+	Memory         int32  `yaml:"memory"`
 }
 
 func main() {
@@ -73,16 +68,16 @@ func main() {
 	}
 
 	log.Printf("connecting to master at %s", s.cfg.MasterAddr)
-	conn, err := net.Dial("tcp", s.cfg.MasterAddr)
+	s.conn, err = net.Dial("tcp", s.cfg.MasterAddr)
 	if err != nil {
 		log.Fatalf("could not connect to master: %v", err)
 	}
 	defer func() {
-		_ = conn.Close()
+		_ = s.conn.Close()
 	}()
 	log.Println("connected to master")
 
-	err = common.SendPacket(conn, common.PacketTypeAuthenticate, common.PacketAuthenticate{
+	err = protocol.SendPacket(s.conn, &protocol.PacketAuthenticate{
 		SlaveName: s.cfg.Name,
 		SecretKey: s.cfg.SecretKey,
 		Memory:    s.cfg.Memory,
@@ -95,42 +90,51 @@ func main() {
 		time.Sleep(10 * time.Second)
 		if !s.authenticated {
 			log.Println("authentication with master timed out")
-			_ = conn.Close()
+			_ = s.conn.Close()
 		}
 	}()
 
-	h := &handler{conn: conn, s: &s}
-	err = common.HandleConnection(io.TeeReader(conn, os.Stdout), h)
-	//err = common.HandleConnection(conn, h)
-	if err != nil {
-		log.Fatalf("connection error: %v", err)
+	for {
+		p, err := protocol.ReadPacket(s.conn)
+		if err != nil {
+			log.Printf("failed to read packet: %v", err)
+			break
+		}
+		err = s.handlePacket(p)
+		if err != nil {
+			log.Printf("failed to handle packet: %v", err)
+			break
+		}
 	}
-	log.Printf("disconnecting from master at %s", conn.RemoteAddr())
-	_ = conn.Close()
+	log.Printf("disconnecting from master at %s", s.conn.RemoteAddr())
+	_ = s.conn.Close()
 }
 
-func (h *handler) HandlePacket(packetType common.PacketType, data json.RawMessage) error {
-	switch packetType {
-	case common.PacketTypeAuthenticate:
-		h.s.authenticated = true
+func (s *slave) handlePacketPreAuth(p proto.Message) error {
+	switch p := p.(type) {
+	case *protocol.PacketAuthSuccess:
+		s.authenticated = true
 		log.Println("authenticated with master")
-	case common.PacketTypeAuthFailed:
-		var p common.PacketAuthFailed
-		err := json.Unmarshal(data, &p)
-		if err != nil {
-			return fmt.Errorf("error unmarshalling packet: %w", err)
-		}
+	default:
+		return fmt.Errorf("received packet before authentication: %T", p)
+	}
+	return nil
+}
+
+func (s *slave) handlePacket(p proto.Message) error {
+	if !s.authenticated {
+		return s.handlePacketPreAuth(p)
+	}
+
+	switch p := p.(type) {
+	case *protocol.PacketAuthFailed:
 		return fmt.Errorf("authentication failed: %s", p.Message)
-	case common.PacketTypeScheduleServiceRequest:
-		var p common.PacketScheduleServiceRequest
-		err := json.Unmarshal(data, &p)
-		if err != nil {
-			return fmt.Errorf("error unmarshalling packet: %w", err)
-		}
+
+	case *protocol.PacketScheduleServiceRequest:
 		log.Printf("asked to schedule service %s", p.Service.Name)
-		svc, err := h.s.svcm.createService(p.Service, p.Group)
+		svc, err := s.svcm.createService(p.Service, p.Group)
 		if err != nil {
-			_ = common.SendPacket(h.conn, common.PacketTypeServiceStartFailed, common.PacketServiceStartFailed{
+			_ = protocol.SendPacket(s.conn, &protocol.PacketServiceStartFailed{
 				ServiceName: p.Service.Name,
 				Message:     fmt.Sprintf("failed to create service: %v", err),
 			})
@@ -138,9 +142,9 @@ func (h *handler) HandlePacket(packetType common.PacketType, data json.RawMessag
 			return nil
 		}
 		log.Printf("starting service %q", p.Service.Name)
-		err = h.s.svcm.startService(svc)
+		err = s.svcm.startService(svc)
 		if err != nil {
-			_ = common.SendPacket(h.conn, common.PacketTypeServiceStartFailed, common.PacketServiceStartFailed{
+			_ = protocol.SendPacket(s.conn, &protocol.PacketServiceStartFailed{
 				ServiceName: p.Service.Name,
 				Message:     fmt.Sprintf("failed to start service: %v", err),
 			})

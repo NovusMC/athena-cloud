@@ -48,6 +48,7 @@ func (tmpl *templateManager) downloadTemplate(name string) error {
 	url := fmt.Sprintf("rsync://%s/templates/%s", tmpl.s.cfg.FileServerHost, name)
 	cmd := exec.Command("rsync", "-a", "--delete", "--port", tmpl.s.cfg.FileServerPort, url, path)
 	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	err = cmd.Run()
 	if err != nil {
 		return fmt.Errorf("failed to sync templates: %w", err)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"github.com/gokrazy/rsync/rsyncd"
 	"io"
@@ -10,6 +11,9 @@ import (
 	"os"
 	"path"
 )
+
+//go:embed assets/athena-velocity.jar
+var athenaVelocityJar []byte
 
 type templateManager struct {
 	m           *master
@@ -42,6 +46,10 @@ func (tmpl *templateManager) init() error {
 		if err != nil {
 			return err
 		}
+	}
+	err = os.WriteFile(path.Join(tmpl.templateDir, "global_proxy", "athena.jar"), athenaVelocityJar, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write athena.jar: %w", err)
 	}
 	return nil
 }

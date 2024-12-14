@@ -1,15 +1,15 @@
 package main
 
 import (
-	"common"
 	"fmt"
 	"log"
+	"protocol"
 	"slices"
 	"sync"
 )
 
 type service struct {
-	*common.ServiceInfo
+	*protocol.Service
 	g *group
 	s *slave
 }
@@ -27,8 +27,8 @@ func newScheduler(m *master) *scheduler {
 func (s *scheduler) scheduleServices() {
 	s.m.gm.mu.RLock()
 	for _, g := range s.m.gm.groups {
-		if len(g.services) < g.MinServices {
-			for i := 0; i < g.MinServices-len(g.services); i++ {
+		if int32(len(g.services)) < g.MinServices {
+			for i := int32(0); i < g.MinServices-int32(len(g.services)); i++ {
 				s.createService(g)
 			}
 		}
@@ -45,13 +45,14 @@ func (s *scheduler) scheduleServices() {
 func (s *scheduler) createService(g *group) {
 	name := s.getNextServiceName(g.Name)
 	svc := &service{
-		ServiceInfo: &common.ServiceInfo{
-			Name:  name,
-			State: common.ServiceStatePending,
-			Type:  g.Type,
-			Group: g.Name,
-			Slave: "",
-			Port:  0,
+		Service: &protocol.Service{
+			Name:   name,
+			State:  protocol.Service_STATE_PENDING,
+			Type:   g.Type,
+			Group:  g.Name,
+			Slave:  "",
+			Port:   0,
+			Memory: 0,
 		},
 		g: g,
 	}
@@ -71,21 +72,21 @@ func (s *scheduler) scheduleService(svc *service) {
 
 	s.m.sm.mu.RLock()
 	for _, slv := range s.m.sm.slaves {
-		if slv.freeMemory >= svc.g.Memory && (svc.s == nil || slv.freeMemory < svc.s.freeMemory) {
+		if slv.authenticated && slv.freeMemory >= svc.g.Memory && (svc.s == nil || slv.freeMemory < svc.s.freeMemory) {
 			svc.s = slv
 		}
 	}
 	s.m.sm.mu.RUnlock()
 
 	if svc.s == nil {
-		if svc.State == common.ServiceStatePending {
+		if svc.State == protocol.Service_STATE_PENDING {
 			log.Printf("service %s is pending", svc.Name)
-			svc.State = common.ServiceStateWaiting
+			svc.State = protocol.Service_STATE_WAITING
 		}
 		return
 	}
 
-	svc.State = common.ServiceStateScheduled
+	svc.State = protocol.Service_STATE_SCHEDULED
 	svc.Slave = svc.s.name
 	log.Printf("scheduling service %s on slave %s", svc.Name, svc.Slave)
 	svc.s.schedule(svc)

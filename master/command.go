@@ -7,6 +7,8 @@ import (
 	"github.com/urfave/cli/v3"
 	"log"
 	"os"
+	"protocol"
+	"strings"
 )
 
 func newCommand(m *master) *cli.Command {
@@ -58,9 +60,9 @@ func newServiceListCmd(m *master) *cli.Command {
 			m.sched.mu.RLock()
 			defer m.sched.mu.RUnlock()
 			log.Println("List of services:")
-			var svcs []*common.ServiceInfo
+			var svcs []*protocol.Service
 			for _, svc := range m.sched.services {
-				svcs = append(svcs, svc.ServiceInfo)
+				svcs = append(svcs, svc.Service)
 			}
 			err := common.EncodeYamlColorized(svcs, m.term)
 			if err != nil {
@@ -94,9 +96,9 @@ func newGroupListCmd(m *master) *cli.Command {
 		Usage: "List all groups",
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			log.Println("List of groups:")
-			var groups []*common.GroupInfo
+			var groups []*protocol.Group
 			for _, g := range m.gm.groups {
-				groups = append(groups, g.GroupInfo)
+				groups = append(groups, g.Group)
 			}
 			err := common.EncodeYamlColorized(groups, m.term)
 			if err != nil {
@@ -120,7 +122,7 @@ func newGroupCreateCmd(m *master) *cli.Command {
 			},
 			&cli.StringFlag{
 				Name:     "type",
-				Usage:    "Group type (proxy, server)",
+				Usage:    "Group type (Proxy, Server)",
 				Required: true,
 			},
 			&cli.IntFlag{
@@ -135,11 +137,15 @@ func newGroupCreateCmd(m *master) *cli.Command {
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			g := &common.GroupInfo{
+			t, exists := protocol.Service_Type_value[strings.ToUpper("TYPE_"+cmd.String("type"))]
+			if !exists {
+				return fmt.Errorf("unknown service type: %s", cmd.String("type"))
+			}
+			g := &protocol.Group{
 				Name:        cmd.String("name"),
-				Type:        common.ServiceType(cmd.String("type")),
-				MinServices: int(cmd.Int("min-services")),
-				MaxServices: int(cmd.Int("max-services")),
+				Type:        protocol.Service_Type(t),
+				MinServices: int32(cmd.Int("min-services")),
+				MaxServices: int32(cmd.Int("max-services")),
 			}
 			err := m.gm.createGroup(g)
 			if err != nil {
