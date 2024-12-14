@@ -3,15 +3,20 @@ package main
 import (
 	"common"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strconv"
+	"sync"
 )
 
 type serviceManager struct {
-	s      *slave
-	tmpDir string
+	s        *slave
+	services []*service
+	mu       sync.RWMutex
+	tmpDir   string
 }
 
 func newServiceManager(s *slave) (*serviceManager, error) {
@@ -35,45 +40,51 @@ func (svcm *serviceManager) init() error {
 }
 
 type service struct {
-	name  string
-	group *common.GroupInfo
-	dir   string
+	*common.ServiceInfo
+	g   *common.GroupInfo
+	dir string
 }
 
-func (svcm *serviceManager) createService(name string, group *common.GroupInfo) error {
+func (svcm *serviceManager) createService(svcInfo *common.ServiceInfo, groupInfo *common.GroupInfo) (*service, error) {
 	svc := &service{
-		name:  name,
-		group: group,
+		ServiceInfo: svcInfo,
+		g:           groupInfo,
 	}
 
-	svc.dir = path.Join(svcm.tmpDir, fmt.Sprintf("%s-%s", name, common.GenerateRandomHex(3)))
+	svc.dir = path.Join(svcm.tmpDir, fmt.Sprintf("%s-%s", svc.Name, common.GenerateRandomHex(3)))
 	err := os.MkdirAll(svc.dir, 0755)
 	if err != nil {
-		return fmt.Errorf("failed to create temp directory: %w", err)
+		return nil, fmt.Errorf("failed to create temp directory: %w", err)
 	}
 
-	err = svcm.s.tmpl.syncTemplates()
-	if err != nil {
-		return fmt.Errorf("failed to sync templates: %w", err)
+	templates := []string{"global_all", fmt.Sprintf("global_%s", svc.Type), groupInfo.Name}
+	for _, tmpl := range templates {
+		err = svcm.s.tmpl.downloadTemplate(tmpl)
+		if err != nil {
+			return nil, fmt.Errorf("failed to download template: %w", err)
+		}
 	}
 
-	templateDir := path.Join(svcm.s.tmpl.templateDir, group.Name)
+	templateDir := path.Join(svcm.s.tmpl.templateDir, svc.g.Name)
 	err = os.CopyFS(svc.dir, os.DirFS(templateDir))
 	if err != nil {
-		return fmt.Errorf("failed to copy template directory: %w", err)
+		return nil, fmt.Errorf("failed to copy template directory: %w", err)
 	}
 
-	err = svcm.startService(svc)
-	if err != nil {
-		return fmt.Errorf("failed to start service: %w", err)
-	}
-
-	return nil
+	svcm.mu.Lock()
+	svcm.services = append(svcm.services, svc)
+	svcm.mu.Unlock()
+	return svc, err
 }
 
 func (svcm *serviceManager) startService(svc *service) error {
+	svc.Port = svcm.findNextFreePort(svc.g.StartPort)
+	if svc.Port < 0 {
+		return fmt.Errorf("failed to find free port")
+	}
+
 	var err error
-	cmd := exec.Command("java", fmt.Sprintf("-Xmx%dM", svc.group.Memory), "-jar", "server.jar")
+	cmd := exec.Command("java", fmt.Sprintf("-Xmx%dM", svc.g.Memory), "-jar", "server.jar", "--port", strconv.Itoa(svc.Port))
 	cmd.Dir, err = filepath.Abs(svc.dir)
 	if err != nil {
 		return fmt.Errorf("failed to get absolute path: %w", err)
@@ -85,4 +96,23 @@ func (svcm *serviceManager) startService(svc *service) error {
 		return fmt.Errorf("failed to start service: %w", err)
 	}
 	return nil
+}
+
+func (svcm *serviceManager) findNextFreePort(startPort int) int {
+	for port := startPort; port < 65535; port++ {
+		if svcm.checkPort("", port) {
+			return port
+		}
+	}
+	return -1
+}
+
+func (svcm *serviceManager) checkPort(host string, port int) bool {
+	bindAddr := net.JoinHostPort(host, strconv.Itoa(port))
+	lis, err := net.Listen("tcp", bindAddr)
+	if err != nil {
+		return false
+	}
+	_ = lis.Close()
+	return true
 }

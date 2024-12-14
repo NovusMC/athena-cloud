@@ -14,6 +14,7 @@ const (
 	PacketTypeAuthSuccess            PacketType = "auth_success"
 	PacketTypeAuthFailed             PacketType = "auth_failed"
 	PacketTypeScheduleServiceRequest PacketType = "schedule_service_request"
+	PacketTypeServiceStartFailed     PacketType = "service_start_failed"
 )
 
 type Packet struct {
@@ -32,8 +33,13 @@ type PacketAuthFailed struct {
 }
 
 type PacketScheduleServiceRequest struct {
-	Name  string     `json:"name"`
-	Group *GroupInfo `json:"group"`
+	Service *ServiceInfo `json:"service"`
+	Group   *GroupInfo   `json:"group"`
+}
+
+type PacketServiceStartFailed struct {
+	ServiceName string `json:"service_name"`
+	Message     string `json:"message"`
 }
 
 func SendPacket(conn net.Conn, packetType PacketType, data any) error {

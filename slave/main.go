@@ -3,8 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/fatih/color"
+	"io"
 	"log"
 	"net"
+	"os"
+	"strings"
 	"time"
 
 	"common"
@@ -27,11 +31,13 @@ type config struct {
 }
 
 type handler struct {
-	s *slave
+	conn net.Conn
+	s    *slave
 }
 
 func main() {
-	fmt.Print(common.Header)
+	fmt.Println(color.RedString(strings.TrimPrefix(common.Header, "\n")))
+	log.SetPrefix(color.WhiteString("[slave] "))
 	log.Printf("starting Athena-Slave %s", common.Version)
 
 	var (
@@ -93,9 +99,9 @@ func main() {
 		}
 	}()
 
-	h := &handler{s: &s}
-	//err = common.HandleConnection(io.TeeReader(conn, os.Stdout), h)
-	err = common.HandleConnection(conn, h)
+	h := &handler{conn: conn, s: &s}
+	err = common.HandleConnection(io.TeeReader(conn, os.Stdout), h)
+	//err = common.HandleConnection(conn, h)
 	if err != nil {
 		log.Fatalf("connection error: %v", err)
 	}
@@ -121,10 +127,25 @@ func (h *handler) HandlePacket(packetType common.PacketType, data json.RawMessag
 		if err != nil {
 			return fmt.Errorf("error unmarshalling packet: %w", err)
 		}
-		log.Printf("asked to schedule service %s", p.Name)
-		err = h.s.svcm.createService(p.Name, p.Group)
+		log.Printf("asked to schedule service %s", p.Service.Name)
+		svc, err := h.s.svcm.createService(p.Service, p.Group)
 		if err != nil {
-			log.Printf("failed to schedule service %s: %v", p.Name, err)
+			_ = common.SendPacket(h.conn, common.PacketTypeServiceStartFailed, common.PacketServiceStartFailed{
+				ServiceName: p.Service.Name,
+				Message:     fmt.Sprintf("failed to create service: %v", err),
+			})
+			log.Printf("failed to schedule service %s: %v", p.Service.Name, err)
+			return nil
+		}
+		log.Printf("starting service %q", p.Service.Name)
+		err = h.s.svcm.startService(svc)
+		if err != nil {
+			_ = common.SendPacket(h.conn, common.PacketTypeServiceStartFailed, common.PacketServiceStartFailed{
+				ServiceName: p.Service.Name,
+				Message:     fmt.Sprintf("failed to start service: %v", err),
+			})
+			log.Printf("failed to start service %q: %v", p.Service.Name, err)
+			return nil
 		}
 	}
 	return nil

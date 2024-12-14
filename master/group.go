@@ -3,24 +3,28 @@ package main
 import (
 	"common"
 	"fmt"
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 	"os"
 	"path"
 	"strings"
+	"sync"
 )
 
 type group struct {
-	info     *common.GroupInfo
+	*common.GroupInfo
 	services []*service
+	mu       sync.RWMutex
 }
 
 type groupManager struct {
+	m        *master
 	groupDir string
 	groups   []*group
+	mu       sync.RWMutex
 }
 
-func newGroupManager() (*groupManager, error) {
-	gm := &groupManager{groupDir: "groups"}
+func newGroupManager(m *master) (*groupManager, error) {
+	gm := &groupManager{m: m, groupDir: "groups"}
 	err := gm.loadGroups()
 	if err != nil {
 		return nil, fmt.Errorf("cannot load groups: %w", err)
@@ -63,10 +67,12 @@ func (gm *groupManager) loadGroups() error {
 		if f.Name() != info.Name+".yaml" {
 			return fmt.Errorf("invalid group file: %q: file name must be %q", f.Name(), info.Name+".yaml")
 		}
-		groups = append(groups, &group{info: &info})
+		groups = append(groups, &group{GroupInfo: &info})
 	}
 
+	gm.mu.Lock()
 	gm.groups = groups
+	gm.mu.Unlock()
 	return nil
 }
 
@@ -92,7 +98,7 @@ func (gm *groupManager) createGroup(info *common.GroupInfo) error {
 		return fmt.Errorf("invalid group: %w", err)
 	}
 	for _, g := range gm.groups {
-		if g.info.Name == info.Name {
+		if g.Name == info.Name {
 			return fmt.Errorf("group %q already exists", info.Name)
 		}
 	}
@@ -100,6 +106,12 @@ func (gm *groupManager) createGroup(info *common.GroupInfo) error {
 	if err != nil {
 		return fmt.Errorf("cannot save group: %w", err)
 	}
-	gm.groups = append(gm.groups, &group{info: info})
+	gm.mu.Lock()
+	gm.groups = append(gm.groups, &group{GroupInfo: info})
+	gm.mu.Unlock()
+	err = gm.m.tmpl.createTemplateDir(info.Name)
+	if err != nil {
+		return fmt.Errorf("failed to create template directory: %w", err)
+	}
 	return nil
 }

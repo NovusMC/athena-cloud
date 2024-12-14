@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"path"
 )
 
 type templateManager struct {
@@ -31,6 +32,24 @@ func (tmpl *templateManager) init() error {
 	err := os.MkdirAll(tmpl.templateDir, 0755)
 	if err != nil {
 		return fmt.Errorf("failed to create template directory: %w", err)
+	}
+	templates := []string{"global_all", "global_proxy", "global_server"}
+	for _, g := range tmpl.m.gm.groups {
+		templates = append(templates, g.Name)
+	}
+	for _, name := range templates {
+		err = tmpl.createTemplateDir(name)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (tmpl *templateManager) createTemplateDir(name string) error {
+	err := os.MkdirAll(path.Join(tmpl.templateDir, name), 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
 	}
 	return nil
 }

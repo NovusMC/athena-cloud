@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/urfave/cli/v3"
-	"gopkg.in/yaml.v3"
 	"log"
 	"os"
 )
@@ -37,9 +36,39 @@ func newCommand(m *master) *cli.Command {
 					newGroupReloadCmd(m),
 				},
 			},
+			{
+				Name:    "service",
+				Aliases: []string{"svc"},
+				Usage:   "Manage services",
+				Commands: []*cli.Command{
+					newServiceListCmd(m),
+				},
+			},
 		},
 	}
 
+	return cmd
+}
+
+func newServiceListCmd(m *master) *cli.Command {
+	cmd := &cli.Command{
+		Name:  "list",
+		Usage: "List services",
+		Action: func(ctx context.Context, command *cli.Command) error {
+			m.sched.mu.RLock()
+			defer m.sched.mu.RUnlock()
+			log.Println("List of services:")
+			var svcs []*common.ServiceInfo
+			for _, svc := range m.sched.services {
+				svcs = append(svcs, svc.ServiceInfo)
+			}
+			err := common.EncodeYamlColorized(svcs, m.term)
+			if err != nil {
+				return fmt.Errorf("cannot marshal services: %w", err)
+			}
+			return nil
+		},
+	}
 	return cmd
 }
 
@@ -65,9 +94,13 @@ func newGroupListCmd(m *master) *cli.Command {
 		Usage: "List all groups",
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			log.Println("List of groups:")
-			err := yaml.NewEncoder(os.Stdout).Encode(m.gm.groups)
+			var groups []*common.GroupInfo
+			for _, g := range m.gm.groups {
+				groups = append(groups, g.GroupInfo)
+			}
+			err := common.EncodeYamlColorized(groups, m.term)
 			if err != nil {
-				return fmt.Errorf("cannot marshal groups: %w", err)
+				return fmt.Errorf("cannot marshal group: %w", err)
 			}
 			return nil
 		},
@@ -104,7 +137,7 @@ func newGroupCreateCmd(m *master) *cli.Command {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			g := &common.GroupInfo{
 				Name:        cmd.String("name"),
-				Type:        common.GroupType(cmd.String("type")),
+				Type:        common.ServiceType(cmd.String("type")),
 				MinServices: int(cmd.Int("min-services")),
 				MaxServices: int(cmd.Int("max-services")),
 			}

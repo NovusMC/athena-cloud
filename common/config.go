@@ -3,7 +3,7 @@ package common
 import (
 	"errors"
 	"fmt"
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 	"os"
 )
 

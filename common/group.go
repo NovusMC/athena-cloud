@@ -6,25 +6,19 @@ import (
 )
 
 type GroupInfo struct {
-	Name        string    `yaml:"name"`
-	Type        GroupType `yaml:"type"`
-	MinServices int       `yaml:"min_services"`
-	MaxServices int       `yaml:"max_services"`
-	Memory      int       `yaml:"memory"`
+	Name        string      `json:"name"`
+	Type        ServiceType `json:"type"`
+	MinServices int         `json:"min_services"`
+	MaxServices int         `json:"max_services"`
+	Memory      int         `json:"memory"`
+	StartPort   int         `json:"start_port"`
 }
-
-type GroupType string
-
-const (
-	GroupTypeProxy  GroupType = "proxy"
-	GroupTypeServer           = "server"
-)
 
 func (g *GroupInfo) Validate() error {
 	if g.Name == "" {
 		return errors.New("group name cannot be empty")
 	}
-	if g.Type != GroupTypeProxy && g.Type != GroupTypeServer {
+	if g.Type != ServiceTypeProxy && g.Type != ServiceTypeServer {
 		return fmt.Errorf("unknown group type %q", g.Type)
 	}
 	if g.MinServices < 0 {

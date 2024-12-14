@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"slices"
+	"sync"
 )
 
 type slaveManager struct {
 	slaves []*slave
+	mu     sync.RWMutex
 }
 
 type slave struct {
@@ -60,6 +63,18 @@ func (h *slaveHandler) HandlePacket(packetType common.PacketType, data json.RawM
 		h.m.sm.slaves = append(h.m.sm.slaves, h.slave)
 		log.Printf("slave %q authenticated", h.slave.name)
 		return common.SendPacket(h.conn, common.PacketTypeAuthenticate, nil)
+
+	case common.PacketTypeServiceStartFailed:
+		var p common.PacketServiceStartFailed
+		err := json.Unmarshal(data, &p)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal packet: %w", err)
+		}
+		log.Printf("slave %q failed to start service %q: %s", h.slave.name, p.ServiceName, p.Message)
+		svc := h.m.sched.getService(p.ServiceName)
+		if svc != nil {
+			h.m.sched.deleteService(svc)
+		}
 	}
 
 	return nil
@@ -69,7 +84,14 @@ var _ common.PacketHandler = &slaveHandler{}
 
 func (s *slave) schedule(svc *service) {
 	_ = common.SendPacket(s.conn, common.PacketTypeScheduleServiceRequest, common.PacketScheduleServiceRequest{
-		Name:  svc.name,
-		Group: svc.group.info,
+		Service: svc.ServiceInfo,
+		Group:   svc.g.GroupInfo,
 	})
+}
+
+func (sm *slaveManager) removeSlave(s *slave) {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+	idx := slices.Index(sm.slaves, s)
+	sm.slaves = slices.Delete(sm.slaves, idx, idx+1)
 }
