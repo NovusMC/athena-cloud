@@ -9,7 +9,6 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 object Packet {
-
     fun sendPacket(out: OutputStream, packet: Message) {
         val payload = Any.pack(packet)
         Protocol.Envelope.newBuilder().setPayload(payload).build()
@@ -26,7 +25,7 @@ object Packet {
         val typeUrl = env.payload.typeUrl
         val typeName = typeUrl.substringAfter("type.googleapis.com/")
         val className = typeName.split(".").joinToString("$").replaceFirstChar(Char::uppercase)
-        val clazz = Class.forName("eu.novusmc.athena.common.${className}") as Class<Message>
+        val clazz = Class.forName("eu.novusmc.athena.common.$className") as Class<Message>
         val msg = env.payload.unpack(clazz)
         return msg
     }
@@ -52,5 +51,4 @@ object Packet {
         val buf = readExactly(input, 4)
         return ByteBuffer.wrap(buf).order(ByteOrder.BIG_ENDIAN).int
     }
-
 }
