@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  format_go:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Run gofmt
+        run: gofmt -w .
+
+      - name: Check uncommitted changes
+        run: git diff --exit-code
+
+      - if: failure()
+        run: echo "::error::Check failed, please run 'make format' and commit the changes.
+
+  format_kotlin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run ktfmt check
+        run: ./gradlew ktfmtCheck
+        working-directory: plugin
+
+      - if: failure()
+        run: echo "::error::Check failed, please run 'make format' and commit the changes.
+
+  protobuf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
+        with:
+          version: "29.1"
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Install protoc-gen-go
+        run: go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+
+      - name: Compile protobufs
+        run: make proto
+
+      - name: Check uncommitted changes
+        run: git diff --exit-code
+
+      - if: failure()
+        run: echo "::error::Check failed, please run 'make proto' and commit the changes.
