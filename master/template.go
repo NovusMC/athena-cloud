@@ -12,8 +12,12 @@ import (
 	"path"
 )
 
-//go:embed assets/athena-velocity.jar
-var athenaVelocityJar []byte
+var (
+	//go:embed assets/athena-kotlin-stdlib.jar
+	athenaKotlinStdlibJar []byte
+	//go:embed assets/athena-velocity.jar
+	athenaVelocityJar []byte
+)
 
 type templateManager struct {
 	m           *master
@@ -37,7 +41,7 @@ func (tmpl *templateManager) init() error {
 	if err != nil {
 		return fmt.Errorf("failed to create template directory: %w", err)
 	}
-	templates := []string{"global_all", "global_proxy", "global_server"}
+	templates := []string{"global_all/plugins", "global_proxy/plugins", "global_server"}
 	for _, g := range tmpl.m.gm.groups {
 		templates = append(templates, g.Name)
 	}
@@ -47,9 +51,13 @@ func (tmpl *templateManager) init() error {
 			return err
 		}
 	}
-	err = os.WriteFile(path.Join(tmpl.templateDir, "global_proxy", "athena.jar"), athenaVelocityJar, 0644)
+	err = os.WriteFile(path.Join(tmpl.templateDir, "global_all/plugins", "athena-kotlin-stdlib.jar"), athenaKotlinStdlibJar, 0644)
 	if err != nil {
-		return fmt.Errorf("failed to write athena.jar: %w", err)
+		return fmt.Errorf("failed to write athena-kotlin-stdlib.jar: %w", err)
+	}
+	err = os.WriteFile(path.Join(tmpl.templateDir, "global_proxy/plugins", "athena-velocity.jar"), athenaVelocityJar, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write athena-velocity.jar: %w", err)
 	}
 	return nil
 }

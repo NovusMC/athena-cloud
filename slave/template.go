@@ -40,12 +40,12 @@ func (tmpl *templateManager) init() error {
 	return nil
 }
 
-func (tmpl *templateManager) downloadTemplate(name string) error {
+func (tmpl *templateManager) syncTemplates() error {
 	path, err := filepath.Abs(tmpl.templateDir)
 	if err != nil {
 		return fmt.Errorf("could not get absolute path for template directory: %w", err)
 	}
-	url := fmt.Sprintf("rsync://%s/templates/%s", tmpl.s.cfg.FileServerHost, name)
+	url := fmt.Sprintf("rsync://%s/templates/", tmpl.s.cfg.FileServerHost)
 	cmd := exec.Command("rsync", "-a", "--delete", "--port", tmpl.s.cfg.FileServerPort, url, path)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

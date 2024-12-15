@@ -76,6 +76,12 @@ func (s *slave) handlePacket(p proto.Message) error {
 		if svc != nil {
 			s.m.sched.deleteService(svc)
 		}
+	case *protocol.PacketServiceStopped:
+		svc := s.m.sched.getService(p.ServiceName)
+		if svc != nil {
+			s.m.sched.deleteService(svc)
+		}
+		log.Printf("service %q on slave %q stopped", p.ServiceName, s.name)
 	}
 	return nil
 }

@@ -115,3 +115,14 @@ func (gm *groupManager) createGroup(g *protocol.Group) error {
 	}
 	return nil
 }
+
+func (gm *groupManager) getGroup(name string) *group {
+	gm.mu.RLock()
+	defer gm.mu.RUnlock()
+	for _, g := range gm.groups {
+		if g.Name == name {
+			return g
+		}
+	}
+	return nil
+}

@@ -23,6 +23,7 @@ type slave struct {
 
 type config struct {
 	Name           string `yaml:"name"`
+	BindAddr       string `yaml:"bind_addr"`
 	MasterAddr     string `yaml:"master_addr"`
 	FileServerHost string `yaml:"file_server_host"`
 	FileServerPort string `yaml:"file_server_port"`
@@ -47,6 +48,7 @@ func main() {
 
 	s.cfg, err = common.ReadConfig("slave.yaml", config{
 		Name:           "slave-01",
+		BindAddr:       ":3000",
 		MasterAddr:     "127.0.0.1:5000",
 		FileServerHost: "127.0.0.1",
 		FileServerPort: "5001",
@@ -93,6 +95,16 @@ func main() {
 			_ = s.conn.Close()
 		}
 	}()
+
+	lis, err := net.Listen("tcp", s.cfg.BindAddr)
+	if err != nil {
+		log.Fatalf("failed starting server: %v", err)
+	}
+	defer func() {
+		_ = lis.Close()
+	}()
+	log.Printf("listening on %s", s.cfg.BindAddr)
+	go s.svcm.handleSlaveConnection(lis)
 
 	for {
 		p, err := protocol.ReadPacket(s.conn)

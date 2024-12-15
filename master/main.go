@@ -65,17 +65,17 @@ func main() {
 	m.sm = newSlaveManager(&m)
 	m.sched = newScheduler(&m)
 
+	err = m.tmpl.startFileServer()
+	if err != nil {
+		log.Fatalf("failed starting file server: %v", err)
+	}
+
 	lis, err := net.Listen("tcp", m.cfg.BindAddr)
 	if err != nil {
 		log.Fatalf("failed starting server: %v", err)
 	}
 	defer lis.Close()
 	log.Printf("listening on %s", m.cfg.BindAddr)
-
-	err = m.tmpl.startFileServer()
-	if err != nil {
-		log.Fatalf("failed starting file server: %v", err)
-	}
 
 	go func() {
 		for {

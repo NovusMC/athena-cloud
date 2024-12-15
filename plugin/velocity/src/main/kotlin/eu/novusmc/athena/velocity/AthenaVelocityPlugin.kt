@@ -28,30 +28,40 @@ class AthenaVelocityPlugin @Inject constructor(
 
     @Subscribe
     fun onProxyInitialization(event: ProxyInitializeEvent) {
-        val cfg = PluginConfig.copyAndLoad(Configuration::class.java, File("plugins/athena/config.json"))
+        try {
+            val cfg = PluginConfig.copyAndLoad(Configuration::class.java, File("plugins/athena/config.json"))
 
-        val sock = try {
-            Socket(cfg.slaveAddr, cfg.slavePort)
-        } catch (e: Exception) {
-            logger.error("Could not connect to slave at ${cfg.slaveAddr}:${cfg.slavePort}")
-            return
-        }
-
-        val out = sock.getOutputStream()
-        Packet.sendPacket(out, Protocol.PacketServiceConnect.newBuilder().build())
-
-        server.scheduler.buildTask(this, { ->
-            val input = sock.getInputStream()
-            while (sock.isConnected) {
-                try {
-                    val p = Packet.readPacket(input)
-                    handlePacket(p)
-                } finally {
-                    break
-                }
+            val sock = try {
+                Socket(cfg.slaveAddr, cfg.slavePort)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                logger.error("Could not connect to slave at ${cfg.slaveAddr}:${cfg.slavePort}")
+                server.shutdown()
+                return
             }
+            logger.info("Connected to slave at ${cfg.slaveAddr}:${cfg.slavePort}")
+
+            val out = sock.getOutputStream()
+            Packet.sendPacket(out, Protocol.PacketServiceConnect.newBuilder().setKey(cfg.key).build())
+
+            server.scheduler.buildTask(this, { ->
+                val input = sock.getInputStream()
+                try {
+                    while (true) {
+                        val p = Packet.readPacket(input) ?: break
+                        handlePacket(p)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                logger.info("Connection to slave lost, shutting down")
+                server.shutdown()
+            }).schedule()
+        } catch(e: Exception) {
+            logger.error("Failed to initialize plugin")
+            e.printStackTrace()
             server.shutdown()
-        }).schedule()
+        }
     }
 
     private fun handlePacket(p: Message) {

@@ -1,2 +1,2 @@
 rootProject.name = "athena"
-include(":common", ":velocity")
+include(":common", ":velocity", ":kotlin-stdlib")

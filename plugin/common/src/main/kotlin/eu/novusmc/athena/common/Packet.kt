@@ -18,13 +18,17 @@ object Packet {
         out.write(buf)
     }
 
-    fun readPacket(input: InputStream): Message {
+    fun readPacket(input: InputStream): Message? {
         val len = readBigEndian32(input)
         val buf = input.readNBytes(len)
+        if (buf.size < len) {
+            return null
+        }
         val env = Protocol.Envelope.parseFrom(buf)
         val typeUrl = env.payload.typeUrl
         val typeName = typeUrl.substringAfter("type.googleapis.com/")
-        val clazz = Class.forName("eu.novusmc.athena.common.Protocol\$${typeName}") as Class<Message>
+        val className = typeName.split(".").joinToString("$").replaceFirstChar(Char::uppercase)
+        val clazz = Class.forName("eu.novusmc.athena.common.${className}") as Class<Message>
         val msg = env.payload.unpack(clazz)
         return msg
     }

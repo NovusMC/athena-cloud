@@ -99,6 +99,14 @@ func (s *scheduler) deleteService(svc *service) {
 		s.services = slices.Delete(s.services, idx, idx+1)
 	}
 	s.mu.Unlock()
+	if svc.g != nil {
+		svc.g.mu.Lock()
+		idx = slices.Index(svc.g.services, svc)
+		if idx != -1 {
+			svc.g.services = slices.Delete(svc.g.services, idx, idx+1)
+		}
+		svc.g.mu.Unlock()
+	}
 }
 
 func (s *scheduler) getNextServiceName(prefix string) string {

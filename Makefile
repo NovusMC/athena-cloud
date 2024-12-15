@@ -1,6 +1,6 @@
 .PHONY: all clean proto plugin master slave
 
-all: clean master slave
+all: master slave
 
 clean:
 	cd plugin && ./gradlew clean
@@ -14,9 +14,9 @@ proto:
 		*.proto
 
 plugin: proto
-	cd plugin && ./gradlew clean build
+	cd plugin && ./gradlew build
 	mkdir -p master/assets
-	cp plugin/build/athena-velocity.jar master/assets
+	cp plugin/build/athena-velocity.jar plugin/build/athena-kotlin-stdlib.jar master/assets
 
 master: proto plugin
 	mkdir -p out/
