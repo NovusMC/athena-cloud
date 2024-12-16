@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"syscall"
 )
 
 func checkForRsync() error {
@@ -49,6 +50,9 @@ func (tmpl *templateManager) syncTemplates() error {
 	cmd := exec.Command("rsync", "-a", "--delete", "--port", tmpl.s.cfg.FileServerPort, url, path)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Pdeathsig: syscall.SIGKILL,
+	}
 	err = cmd.Run()
 	if err != nil {
 		return fmt.Errorf("failed to sync templates: %w", err)

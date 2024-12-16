@@ -1,11 +1,10 @@
 package main
 
 import (
+	"common"
 	"fmt"
 	"log"
 	"protocol"
-	"slices"
-	"sync"
 )
 
 type service struct {
@@ -17,7 +16,6 @@ type service struct {
 type scheduler struct {
 	m        *master
 	services []*service
-	mu       sync.RWMutex
 }
 
 func newScheduler(m *master) *scheduler {
@@ -25,21 +23,40 @@ func newScheduler(m *master) *scheduler {
 }
 
 func (s *scheduler) scheduleServices() {
-	s.m.gm.mu.RLock()
 	for _, g := range s.m.gm.groups {
-		if int32(len(g.services)) < g.MinServices {
-			for i := int32(0); i < g.MinServices-int32(len(g.services)); i++ {
+		nSvcs := int32(len(s.m.gm.services(g)))
+		if nSvcs < g.MinServices {
+			for i := int32(0); i < g.MinServices-nSvcs; i++ {
 				s.createService(g)
 			}
 		}
+		if nSvcs > g.MaxServices {
+			var svcs []*service
+			for _, svc := range s.m.gm.services(g) {
+				if svc.State != protocol.Service_STATE_STOPPING {
+					svcs = append(svcs, svc)
+				}
+			}
+			toStop := svcs[g.MaxServices:]
+			for _, svc := range toStop {
+				if svc.State == protocol.Service_STATE_ONLINE {
+					err := s.stopService(svc)
+					if err != nil {
+						log.Printf("failed to stop service %q: %v", svc.Name, err)
+					}
+				} else {
+					err := s.deleteService(svc)
+					if err != nil {
+						log.Printf("failed to delete service %q: %v", svc.Name, err)
+					}
+				}
+			}
+		}
 	}
-	s.m.gm.mu.RUnlock()
 
-	s.mu.RLock()
 	for _, svc := range s.services {
 		s.scheduleService(svc)
 	}
-	s.mu.RUnlock()
 }
 
 func (s *scheduler) createService(g *group) {
@@ -56,13 +73,8 @@ func (s *scheduler) createService(g *group) {
 		},
 		g: g,
 	}
-	s.mu.Lock()
 	s.services = append(s.services, svc)
-	s.mu.Unlock()
-	g.mu.Lock()
-	g.services = append(g.services, svc)
-	g.mu.Unlock()
-	log.Printf("service %s created", svc.Name)
+	log.Printf("service %q created", svc.Name)
 }
 
 func (s *scheduler) scheduleService(svc *service) {
@@ -70,43 +82,45 @@ func (s *scheduler) scheduleService(svc *service) {
 		return
 	}
 
-	s.m.sm.mu.RLock()
 	for _, slv := range s.m.sm.slaves {
 		if slv.authenticated && slv.freeMemory >= svc.g.Memory && (svc.s == nil || slv.freeMemory < svc.s.freeMemory) {
 			svc.s = slv
 		}
 	}
-	s.m.sm.mu.RUnlock()
-
 	if svc.s == nil {
-		if svc.State == protocol.Service_STATE_PENDING {
-			log.Printf("service %s is pending", svc.Name)
-			svc.State = protocol.Service_STATE_WAITING
-		}
 		return
 	}
 
 	svc.State = protocol.Service_STATE_SCHEDULED
 	svc.Slave = svc.s.name
-	log.Printf("scheduling service %s on slave %s", svc.Name, svc.Slave)
+	log.Printf("scheduling service %q on slave %q", svc.Name, svc.Slave)
 	svc.s.schedule(svc)
 }
 
-func (s *scheduler) deleteService(svc *service) {
-	s.mu.Lock()
-	idx := slices.Index(s.services, svc)
-	if idx != -1 {
-		s.services = slices.Delete(s.services, idx, idx+1)
+func (s *scheduler) stopService(svc *service) error {
+	log.Printf("stopping service %q on slave %q", svc.Name, svc.Slave)
+	if svc.s == nil {
+		return fmt.Errorf("service %q is not running", svc.Name)
 	}
-	s.mu.Unlock()
-	if svc.g != nil {
-		svc.g.mu.Lock()
-		idx = slices.Index(svc.g.services, svc)
-		if idx != -1 {
-			svc.g.services = slices.Delete(svc.g.services, idx, idx+1)
-		}
-		svc.g.mu.Unlock()
+	svc.State = protocol.Service_STATE_STOPPING
+	err := protocol.SendPacket(svc.s.conn, &protocol.PacketStopService{
+		ServiceName: svc.Name,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to stop service %q on slave %q: %v", svc.Name, svc.Slave, err)
 	}
+	return nil
+}
+
+func (s *scheduler) deleteService(svc *service) error {
+	if svc.State == protocol.Service_STATE_SCHEDULED ||
+		svc.State == protocol.Service_STATE_ONLINE ||
+		svc.State == protocol.Service_STATE_STOPPING {
+		return fmt.Errorf("service %q is in state %s", svc.Name, svc.State)
+	}
+	s.services = common.DeleteItem(s.services, svc)
+	log.Printf("service %q deleted", svc.Name)
+	return nil
 }
 
 func (s *scheduler) getNextServiceName(prefix string) string {
@@ -119,8 +133,6 @@ func (s *scheduler) getNextServiceName(prefix string) string {
 }
 
 func (s *scheduler) getService(name string) *service {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
 	for _, svc := range s.services {
 		if svc.Name == name {
 			return svc

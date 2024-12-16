@@ -3,8 +3,10 @@ package main
 import (
 	"common"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"google.golang.org/protobuf/proto"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -12,16 +14,14 @@ import (
 	"path"
 	"path/filepath"
 	"protocol"
-	"slices"
 	"strconv"
-	"sync"
+	"syscall"
 	"time"
 )
 
 type serviceManager struct {
 	s        *slave
 	services []*service
-	mu       sync.RWMutex
 	tmpDir   string
 }
 
@@ -55,6 +55,17 @@ type service struct {
 	conn net.Conn
 	dir  string
 	key  string
+	cmd  *exec.Cmd
+}
+
+func (svcm *serviceManager) setConnected(svc *service, conn net.Conn) {
+	svc.conn = conn
+	svc.State = protocol.Service_STATE_ONLINE
+	log.Printf("service %q connected", svc.Name)
+	_ = protocol.SendPacket(svcm.s.conn, &protocol.PacketServiceOnline{
+		ServiceName: svc.Name,
+		Port:        svc.Port,
+	})
 }
 
 func (svcm *serviceManager) createService(protoService *protocol.Service, group *protocol.Group) (*service, error) {
@@ -100,7 +111,7 @@ func (svcm *serviceManager) createService(protoService *protocol.Service, group 
 		return nil, fmt.Errorf("unknown service type: %v", svc.Type)
 	}
 
-	fmt.Println("downloading templates")
+	log.Println("downloading templates")
 	err = svcm.s.tmpl.syncTemplates()
 	if err != nil {
 		return nil, fmt.Errorf("failed to download template: %w", err)
@@ -114,10 +125,7 @@ func (svcm *serviceManager) createService(protoService *protocol.Service, group 
 			return nil, fmt.Errorf("failed to copy template %q: %w", tmpl, err)
 		}
 	}
-
-	svcm.mu.Lock()
 	svcm.services = append(svcm.services, svc)
-	svcm.mu.Unlock()
 	return svc, err
 }
 
@@ -128,46 +136,55 @@ func (svcm *serviceManager) startService(svc *service) error {
 	}
 
 	var err error
-	cmd := exec.Command("java", fmt.Sprintf("-Xmx%dM", svc.g.Memory), "-jar", "server.jar", "--port", strconv.Itoa(int(svc.Port)))
-	cmd.Dir, err = filepath.Abs(svc.dir)
+	svc.cmd = exec.Command("java", fmt.Sprintf("-Xmx%dM", svc.g.Memory), "-jar", "server.jar", "--port", strconv.Itoa(int(svc.Port)))
+	svc.cmd.Dir, err = filepath.Abs(svc.dir)
 	if err != nil {
 		return fmt.Errorf("failed to get absolute path: %w", err)
 	}
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err = cmd.Start()
+	svc.cmd.Stdout = os.Stdout
+	svc.cmd.Stderr = os.Stderr
+	err = svc.cmd.Start()
 	if err != nil {
 		return fmt.Errorf("failed to start service: %w", err)
 	}
 
 	go func() {
-		err := cmd.Wait()
-		if err != nil {
+		err := svc.cmd.Wait()
+		if err != nil && err.Error() != "exit status 143" { // 143: exited by SIGTERM
 			log.Printf("service %s exited with error: %v", svc.Name, err)
 		} else {
 			log.Printf("service %s exited", svc.Name)
 		}
-		err = protocol.SendPacket(svcm.s.conn, &protocol.PacketServiceStopped{
-			ServiceName: svc.Name,
-		})
-		if err != nil {
-			log.Printf("failed to send service stopped packet: %v", err)
-		}
-		err = svcm.deleteService(svc)
-		if err != nil {
-			log.Printf("failed to delete service %q: %v", svc.Name, err)
-		}
+		svcm.s.ch <- serviceStoppedCmd{svc}
 	}()
 	return nil
 }
 
-func (svcm *serviceManager) deleteService(svc *service) error {
-	svcm.mu.Lock()
-	idx := slices.Index(svcm.services, svc)
-	if idx != -1 {
-		svcm.services = slices.Delete(svcm.services, idx, idx+1)
+func (svcm *serviceManager) stopService(svc *service) error {
+	if svc.cmd == nil {
+		return fmt.Errorf("service is not running")
 	}
-	svcm.mu.Unlock()
+	err := svc.cmd.Process.Signal(syscall.SIGTERM)
+	if err != nil {
+		return fmt.Errorf("failed to stop service: %w", err)
+	}
+	return nil
+}
+
+func (svcm *serviceManager) getService(name string) *service {
+	for _, svc := range svcm.services {
+		if svc.Name == name {
+			return svc
+		}
+	}
+	return nil
+}
+
+func (svcm *serviceManager) deleteService(svc *service) error {
+	if svc.cmd != nil {
+		return fmt.Errorf("service %q is still running", svc.Name)
+	}
+	svcm.services = common.DeleteItem(svcm.services, svc)
 	err := os.RemoveAll(svc.dir)
 	if err != nil {
 		return fmt.Errorf("failed to remove service directory: %w", err)
@@ -176,7 +193,17 @@ func (svcm *serviceManager) deleteService(svc *service) error {
 }
 
 func (svcm *serviceManager) findNextFreePort(startPort int32) int32 {
+	usedPorts := make(map[int]struct{})
+	for _, svc := range svcm.services {
+		if svc.Port > 0 {
+			usedPorts[int(svc.Port)] = struct{}{}
+		}
+	}
+
 	for port := startPort; port < 65535; port++ {
+		if _, used := usedPorts[int(port)]; used {
+			continue
+		}
 		if svcm.checkPort("", port) {
 			return port
 		}
@@ -194,12 +221,14 @@ func (svcm *serviceManager) checkPort(host string, port int32) bool {
 	return true
 }
 
-func (svcm *serviceManager) handleSlaveConnection(lis net.Listener) {
+func handleServiceConnection(ch chan<- any, lis net.Listener) {
 	for {
 		conn, err := lis.Accept()
 		if err != nil {
-			log.Printf("connection error: %v", err)
-			continue
+			if !errors.Is(err, net.ErrClosed) {
+				log.Printf("connection error: %v", err)
+			}
+			break
 		}
 		log.Printf("new connection from %s", conn.RemoteAddr())
 		go func() {
@@ -227,41 +256,33 @@ func (svcm *serviceManager) handleSlaveConnection(lis net.Listener) {
 				_ = conn.Close()
 				return
 			} else {
-				for _, service := range svcm.services {
-					if service.conn == nil && p.Key == service.key {
-						svc = service
-						break
-					}
-				}
+				svcCh := make(chan *service)
+				ch <- serviceConnectCmd{key: p.Key, conn: conn, svcCh: svcCh}
+				svc = <-svcCh
 			}
 			if svc == nil {
 				log.Printf("service at %s could not be identified", conn.RemoteAddr())
 				_ = conn.Close()
 				return
 			}
-			svc.conn = conn
-			log.Printf("service %q connected", svc.Name)
-			err = protocol.SendPacket(svcm.s.conn, &protocol.PacketServiceOnline{
-				ServiceName: svc.Name,
-			})
 			for {
 				p, err := protocol.ReadPacket(conn)
 				if err != nil {
-					log.Printf("failed reading packet: %v", err)
+					if !errors.Is(err, io.EOF) {
+						log.Printf("failed reading packet: %v", err)
+					}
 					break
 				}
-				err = svc.handlePacket(p)
-				if err != nil {
+				errCh := make(chan error)
+				ch <- handleServicePacketCmd{svc: svc, p: p, errCh: errCh}
+				if err = <-errCh; err != nil {
 					log.Printf("failed handling packet: %v", err)
 					break
 				}
 			}
 			_ = conn.Close()
 			log.Printf("service %q disconnected", svc.Name)
-			err = svcm.deleteService(svc)
-			if err != nil {
-				log.Printf("failed to delete service %q: %v", svc.Name, err)
-			}
+			ch <- serviceDisconnectCmd{svc: svc}
 		}()
 	}
 }

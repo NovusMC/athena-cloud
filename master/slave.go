@@ -1,19 +1,19 @@
 package main
 
 import (
+	"common"
+	"errors"
 	"fmt"
 	"google.golang.org/protobuf/proto"
+	"io"
 	"log"
 	"net"
 	"protocol"
-	"slices"
-	"sync"
 )
 
 type slaveManager struct {
 	m      *master
 	slaves []*slave
-	mu     sync.RWMutex
 }
 
 type slave struct {
@@ -31,9 +31,7 @@ func newSlaveManager(m *master) *slaveManager {
 
 func (sm *slaveManager) newSlave(conn net.Conn) *slave {
 	slv := &slave{conn: conn, m: sm.m}
-	sm.mu.Lock()
 	sm.slaves = append(sm.slaves, slv)
-	sm.mu.Unlock()
 	return slv
 }
 
@@ -74,14 +72,30 @@ func (s *slave) handlePacket(p proto.Message) error {
 		log.Printf("slave %q failed to start service %q: %s", s.name, p.ServiceName, p.Message)
 		svc := s.m.sched.getService(p.ServiceName)
 		if svc != nil {
-			s.m.sched.deleteService(svc)
+			svc.State = protocol.Service_STATE_OFFLINE
+			err := s.m.sched.deleteService(svc)
+			if err != nil {
+				log.Printf("failed to delete service %q: %v", svc.Service.Name, err)
+			}
 		}
 	case *protocol.PacketServiceStopped:
+		log.Printf("service %q on slave %q stopped", p.ServiceName, s.name)
 		svc := s.m.sched.getService(p.ServiceName)
 		if svc != nil {
-			s.m.sched.deleteService(svc)
+			svc.State = protocol.Service_STATE_OFFLINE
+			svc.Port = 0
+			err := s.m.sched.deleteService(svc)
+			if err != nil {
+				fmt.Printf("failed to delete service %q: %v", svc.Service.Name, err)
+			}
 		}
-		log.Printf("service %q on slave %q stopped", p.ServiceName, s.name)
+	case *protocol.PacketServiceOnline:
+		svc := s.m.sched.getService(p.ServiceName)
+		if svc != nil {
+			svc.State = protocol.Service_STATE_ONLINE
+			svc.Port = p.Port
+			log.Printf("service %q on slave %q is now online", p.ServiceName, s.name)
+		}
 	}
 	return nil
 }
@@ -93,20 +107,75 @@ func (s *slave) schedule(svc *service) {
 	})
 }
 
-func (sm *slaveManager) removeSlave(s *slave) {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
-	idx := slices.Index(sm.slaves, s)
-	sm.slaves = slices.Delete(sm.slaves, idx, idx+1)
+func (sm *slaveManager) removeSlave(slv *slave) {
+	if slv.authenticated {
+		log.Printf("slave %q disconnected", slv.name)
+	} else {
+		log.Printf("authentication with slave %q failed", slv.conn.RemoteAddr())
+	}
+	sm.slaves = common.DeleteItem(sm.slaves, slv)
+	for _, svc := range slv.services() {
+		svc.s = nil
+		svc.Port = 0
+		svc.State = protocol.Service_STATE_OFFLINE
+		err := slv.m.sched.deleteService(svc)
+		if err != nil {
+			log.Printf("failed to delete service %q: %v", svc.Service.Name, err)
+		}
+	}
 }
 
 func (sm *slaveManager) getSlave(name string) *slave {
-	sm.mu.RLock()
-	defer sm.mu.RUnlock()
 	for _, s := range sm.slaves {
 		if s.name == name {
 			return s
 		}
 	}
 	return nil
+}
+
+func handleSlaveConnection(ch chan<- any, lis net.Listener) {
+	for {
+		conn, err := lis.Accept()
+		if err != nil {
+			if !errors.Is(err, net.ErrClosed) {
+				log.Printf("connection error: %v", err)
+			}
+			break
+		}
+		log.Printf("new connection from %s", conn.RemoteAddr())
+		slvCh := make(chan *slave)
+		ch <- createSlaveCmd{conn: conn, slvCh: slvCh}
+		slv := <-slvCh
+		go func() {
+			for {
+				p, err := protocol.ReadPacket(conn)
+				if err != nil {
+					if !errors.Is(err, io.EOF) {
+						log.Printf("failed reading packet: %v", err)
+					}
+					break
+				}
+				errCh := make(chan error)
+				ch <- handleSlavePacketCmd{slv: slv, p: p, errCh: errCh}
+				err = <-errCh
+				if err != nil {
+					log.Printf("failed handling packet: %v", err)
+					break
+				}
+			}
+			_ = conn.Close()
+			ch <- removeSlaveCmd{slv}
+		}()
+	}
+}
+
+func (s *slave) services() []*service {
+	var services []*service
+	for _, svc := range s.m.sched.services {
+		if svc.s == s {
+			services = append(services, svc)
+		}
+	}
+	return services
 }

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/fatih/color"
 	"google.golang.org/protobuf/proto"
+	"io"
 	"log"
 	"net"
 	"protocol"
@@ -19,6 +21,7 @@ type slave struct {
 	authenticated bool
 	tmpl          *templateManager
 	svcm          *serviceManager
+	ch            chan<- any
 }
 
 type config struct {
@@ -45,6 +48,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
+
+	ch := make(chan any)
+	s.ch = ch
 
 	s.cfg, err = common.ReadConfig("slave.yaml", config{
 		Name:           "slave-01",
@@ -74,9 +80,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not connect to master: %v", err)
 	}
-	defer func() {
-		_ = s.conn.Close()
-	}()
 	log.Println("connected to master")
 
 	err = protocol.SendPacket(s.conn, &protocol.PacketAuthenticate{
@@ -104,20 +107,11 @@ func main() {
 		_ = lis.Close()
 	}()
 	log.Printf("listening on %s", s.cfg.BindAddr)
-	go s.svcm.handleSlaveConnection(lis)
+	go handleMasterConnection(ch, s.conn)
+	go handleServiceConnection(ch, lis)
 
-	for {
-		p, err := protocol.ReadPacket(s.conn)
-		if err != nil {
-			log.Printf("failed to read packet: %v", err)
-			break
-		}
-		err = s.handlePacket(p)
-		if err != nil {
-			log.Printf("failed to handle packet: %v", err)
-			break
-		}
-	}
+	s.runCommandQueue(ch)
+
 	log.Printf("disconnecting from master at %s", s.conn.RemoteAddr())
 	_ = s.conn.Close()
 }
@@ -163,6 +157,39 @@ func (s *slave) handlePacket(p proto.Message) error {
 			log.Printf("failed to start service %q: %v", p.Service.Name, err)
 			return nil
 		}
+
+	case *protocol.PacketStopService:
+		svc := s.svcm.getService(p.ServiceName)
+		if svc == nil {
+			log.Printf("service %q not found", p.ServiceName)
+			return nil
+		}
+		log.Printf("stopping service %q", p.ServiceName)
+		err := s.svcm.stopService(svc)
+		if err != nil {
+			log.Printf("failed to stop service %q: %v", p.ServiceName, err)
+			return nil
+		}
 	}
 	return nil
+}
+
+func handleMasterConnection(ch chan<- any, conn net.Conn) {
+	for {
+		p, err := protocol.ReadPacket(conn)
+		if err != nil {
+			if !errors.Is(err, io.EOF) {
+				log.Printf("failed to read packet: %v", err)
+			}
+			break
+		}
+		errCh := make(chan error)
+		ch <- handleMasterPacketCmd{p: p, errCh: errCh}
+		err = <-errCh
+		if err != nil {
+			log.Printf("failed to handle packet: %v", err)
+			break
+		}
+	}
+	ch <- slaveDisconnectCmd{}
 }

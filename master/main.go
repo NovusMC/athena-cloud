@@ -1,13 +1,13 @@
 package main
 
 import (
-	"context"
+	"errors"
 	"fmt"
 	"github.com/fatih/color"
+	"github.com/urfave/cli/v3"
 	"io"
 	"log"
 	"net"
-	"protocol"
 	"strings"
 	"time"
 
@@ -23,6 +23,7 @@ type master struct {
 	sched *scheduler
 	tmpl  *templateManager
 	term  io.Writer
+	cli   *cli.Command
 }
 
 type config struct {
@@ -41,6 +42,8 @@ func main() {
 		err error
 		m   master
 	)
+
+	ch := make(chan any)
 
 	m.cfg, err = common.ReadConfig("master.yaml", config{
 		BindAddr:           "0.0.0.0:5000",
@@ -64,6 +67,7 @@ func main() {
 
 	m.sm = newSlaveManager(&m)
 	m.sched = newScheduler(&m)
+	m.cli = newCli(ch, &m)
 
 	err = m.tmpl.startFileServer()
 	if err != nil {
@@ -74,50 +78,18 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed starting server: %v", err)
 	}
-	defer lis.Close()
-	log.Printf("listening on %s", m.cfg.BindAddr)
-
-	go func() {
-		for {
-			conn, err := lis.Accept()
-			if err != nil {
-				log.Printf("connection error: %v", err)
-				continue
-			}
-			log.Printf("new connection from %s", conn.RemoteAddr())
-			slv := m.sm.newSlave(conn)
-			go func() {
-				for {
-					p, err := protocol.ReadPacket(conn)
-					if err != nil {
-						log.Printf("failed reading packet: %v", err)
-						break
-					}
-					err = slv.handlePacket(p)
-					if err != nil {
-						log.Printf("failed handling packet: %v", err)
-						break
-					}
-				}
-				_ = conn.Close()
-				if slv.authenticated {
-					log.Printf("slave %q disconnected", slv.name)
-				} else {
-					log.Printf("authentication with slave %s failed", conn.RemoteAddr())
-				}
-				m.sm.removeSlave(slv)
-			}()
-		}
+	defer func() {
+		_ = lis.Close()
 	}()
+	log.Printf("listening on %s", m.cfg.BindAddr)
+	go handleSlaveConnection(ch, lis)
 
 	go func() {
 		t := time.NewTicker(time.Second)
 		for range t.C {
-			m.sched.scheduleServices()
+			ch <- scheduleServicesCmd{}
 		}
 	}()
-
-	cmd := newCommand(&m)
 
 	l, err := readline.NewEx(&readline.Config{
 		Prompt:            "\033[31m»\033[0m ",
@@ -127,21 +99,33 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed starting readline: %v", err)
 	}
-	defer func() {
-		_ = l.Close()
-	}()
 	l.CaptureExitSignal()
 	log.SetOutput(l.Stderr())
 	m.term = l.Stderr()
 
-	for {
-		line, _ := l.Readline()
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
+	go func() {
+		for {
+			line, err := l.Readline()
+			if err != nil {
+				if errors.Is(err, readline.ErrInterrupt) {
+					continue
+				}
+				if !errors.Is(err, io.EOF) {
+					log.Printf("error reading line: %v", err)
+				}
+				break
+			}
+			line = strings.TrimSpace(line)
+			if line == "" {
+				continue
+			}
+			args := strings.Split(line, " ")
+			args = append([]string{""}, args...)
+			ch <- runCliCmd{args}
 		}
+	}()
 
-		args := strings.Split(line, " ")
-		_ = cmd.Run(context.Background(), append([]string{""}, args...))
-	}
+	m.runCommandQueue(ch)
+
+	log.Printf("shutting down")
 }

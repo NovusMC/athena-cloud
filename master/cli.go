@@ -6,25 +6,26 @@ import (
 	"fmt"
 	"github.com/urfave/cli/v3"
 	"log"
-	"os"
 	"protocol"
 	"strings"
 )
 
-func newCommand(m *master) *cli.Command {
+func newCli(ch chan<- any, m *master) *cli.Command {
 	cmd := &cli.Command{
-		ExitErrHandler: func(ctx context.Context, command *cli.Command, err error) {
-			log.Printf("error: %v", err)
-		},
+		ExitErrHandler: func(context.Context, *cli.Command, error) {},
 
-		Name: "master",
+		Name:      "master",
+		Writer:    m.term,
+		ErrWriter: m.term,
 
 		Commands: []*cli.Command{
 			{
-				Name:  "exit",
+				Name:  "shutdown",
 				Usage: "Shut down master",
 				Action: func(ctx context.Context, command *cli.Command) error {
-					os.Exit(0)
+					go func() {
+						ch <- masterShutdownCmd{}
+					}()
 					return nil
 				},
 			},
@@ -43,6 +44,7 @@ func newCommand(m *master) *cli.Command {
 				Aliases: []string{"svc"},
 				Usage:   "Manage services",
 				Commands: []*cli.Command{
+					newServiceStopCmd(m),
 					newServiceListCmd(m),
 				},
 			},
@@ -52,13 +54,39 @@ func newCommand(m *master) *cli.Command {
 	return cmd
 }
 
+func newServiceStopCmd(m *master) *cli.Command {
+	var svcName string
+	cmd := &cli.Command{
+		Name:  "stop",
+		Usage: "Stops a service",
+		Arguments: []cli.Argument{
+			&cli.StringArg{
+				Name:        "<name>",
+				Destination: &svcName,
+				Min:         1,
+				Max:         1,
+			},
+		},
+		Action: func(ctx context.Context, command *cli.Command) error {
+			svc := m.sched.getService(svcName)
+			if svc == nil {
+				return fmt.Errorf("unknown service: %s", svcName)
+			}
+			err := m.sched.stopService(svc)
+			if err != nil {
+				return fmt.Errorf("failed to stop service: %w", err)
+			}
+			return nil
+		},
+	}
+	return cmd
+}
+
 func newServiceListCmd(m *master) *cli.Command {
 	cmd := &cli.Command{
 		Name:  "list",
 		Usage: "List services",
 		Action: func(ctx context.Context, command *cli.Command) error {
-			m.sched.mu.RLock()
-			defer m.sched.mu.RUnlock()
 			log.Println("List of services:")
 			var svcs []*protocol.Service
 			for _, svc := range m.sched.services {
@@ -79,11 +107,11 @@ func newGroupReloadCmd(m *master) *cli.Command {
 		Name:  "reload",
 		Usage: "Reload groups",
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			err := m.gm.loadGroups()
+			err := m.gm.reloadGroups()
 			if err != nil {
 				return fmt.Errorf("cannot reload groups: %w", err)
 			}
-			log.Println("Groups reloaded")
+			log.Println("groups reloaded")
 			return nil
 		},
 	}
