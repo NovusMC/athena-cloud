@@ -16,7 +16,7 @@ proto:
 plugin: proto
 	cd plugin && ./gradlew build
 	mkdir -p master/assets
-	cp plugin/build/athena-velocity.jar plugin/build/athena-kotlin-stdlib.jar master/assets
+	cp plugin/build/athena-velocity.jar plugin/build/athena-paper.jar plugin/build/athena-kotlin-stdlib.jar master/assets
 
 master: proto plugin
 	mkdir -p out/

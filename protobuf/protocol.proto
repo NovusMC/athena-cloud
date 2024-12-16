@@ -43,6 +43,11 @@ message Envelope {
   google.protobuf.Any payload = 1;
 }
 
+message ServiceEnvelope {
+  string service_name = 1;
+  google.protobuf.Any payload = 2;
+}
+
 message PacketAuthenticate {
   string slave_name = 1;
   string secret_key = 2;
@@ -80,4 +85,14 @@ message PacketServiceConnect {
 
 message PacketStopService {
   string service_name = 1;
+}
+
+message PacketProxyRegisterServer {
+  string server_name = 1;
+  string host = 2;
+  int32 port = 3;
+}
+
+message PacketProxyUnregisterServer {
+  string server_name = 1;
 }

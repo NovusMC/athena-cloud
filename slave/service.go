@@ -22,6 +22,7 @@ import (
 type serviceManager struct {
 	s        *slave
 	services []*service
+	byName   map[string]*service
 	tmpDir   string
 }
 
@@ -29,6 +30,7 @@ func newServiceManager(s *slave) (*serviceManager, error) {
 	svcm := &serviceManager{
 		s:      s,
 		tmpDir: "tmp",
+		byName: make(map[string]*service),
 	}
 	err := svcm.init()
 	if err != nil {
@@ -62,7 +64,7 @@ func (svcm *serviceManager) setConnected(svc *service, conn net.Conn) {
 	svc.conn = conn
 	svc.State = protocol.Service_STATE_ONLINE
 	log.Printf("service %q connected", svc.Name)
-	_ = protocol.SendPacket(svcm.s.conn, &protocol.PacketServiceOnline{
+	_ = svcm.s.sendPacket(&protocol.PacketServiceOnline{
 		ServiceName: svc.Name,
 		Port:        svc.Port,
 	})
@@ -126,6 +128,7 @@ func (svcm *serviceManager) createService(protoService *protocol.Service, group 
 		}
 	}
 	svcm.services = append(svcm.services, svc)
+	svcm.byName[svc.Name] = svc
 	return svc, err
 }
 
@@ -136,7 +139,18 @@ func (svcm *serviceManager) startService(svc *service) error {
 	}
 
 	var err error
-	svc.cmd = exec.Command("java", fmt.Sprintf("-Xmx%dM", svc.g.Memory), "-jar", "server.jar", "--port", strconv.Itoa(int(svc.Port)))
+	jvmArgs := []string{
+		fmt.Sprintf("-Xmx%dM", svc.g.Memory),
+	}
+	serverArgs := []string{
+		"--port", strconv.Itoa(int(svc.Port)),
+	}
+	if svc.Type == protocol.Service_TYPE_SERVER {
+		serverArgs = append(serverArgs, "--nogui", "--online-mode=false")
+	}
+	args := append(append(jvmArgs, "-jar", "server.jar"), serverArgs...)
+
+	svc.cmd = exec.Command("java", args...)
 	svc.cmd.Dir, err = filepath.Abs(svc.dir)
 	if err != nil {
 		return fmt.Errorf("failed to get absolute path: %w", err)
@@ -172,12 +186,7 @@ func (svcm *serviceManager) stopService(svc *service) error {
 }
 
 func (svcm *serviceManager) getService(name string) *service {
-	for _, svc := range svcm.services {
-		if svc.Name == name {
-			return svc
-		}
-	}
-	return nil
+	return svcm.byName[name]
 }
 
 func (svcm *serviceManager) deleteService(svc *service) error {
@@ -185,6 +194,7 @@ func (svcm *serviceManager) deleteService(svc *service) error {
 		return fmt.Errorf("service %q is still running", svc.Name)
 	}
 	svcm.services = common.DeleteItem(svcm.services, svc)
+	delete(svcm.byName, svc.Name)
 	err := os.RemoveAll(svc.dir)
 	if err != nil {
 		return fmt.Errorf("failed to remove service directory: %w", err)
@@ -285,6 +295,13 @@ func handleServiceConnection(ch chan<- any, lis net.Listener) {
 			ch <- serviceDisconnectCmd{svc: svc}
 		}()
 	}
+}
+
+func (svc *service) sendPacket(p proto.Message) error {
+	if svc.conn == nil {
+		return fmt.Errorf("not connected")
+	}
+	return protocol.SendPacket(svc.conn, p)
 }
 
 func (svc *service) handlePacket(p proto.Message) error {

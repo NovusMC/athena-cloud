@@ -82,7 +82,7 @@ func main() {
 	}
 	log.Println("connected to master")
 
-	err = protocol.SendPacket(s.conn, &protocol.PacketAuthenticate{
+	err = s.sendPacket(&protocol.PacketAuthenticate{
 		SlaveName: s.cfg.Name,
 		SecretKey: s.cfg.SecretKey,
 		Memory:    s.cfg.Memory,
@@ -116,6 +116,10 @@ func main() {
 	_ = s.conn.Close()
 }
 
+func (s *slave) sendPacket(p proto.Message) error {
+	return protocol.SendPacket(s.conn, p)
+}
+
 func (s *slave) handlePacketPreAuth(p proto.Message) error {
 	switch p := p.(type) {
 	case *protocol.PacketAuthSuccess:
@@ -140,7 +144,7 @@ func (s *slave) handlePacket(p proto.Message) error {
 		log.Printf("asked to schedule service %s", p.Service.Name)
 		svc, err := s.svcm.createService(p.Service, p.Group)
 		if err != nil {
-			_ = protocol.SendPacket(s.conn, &protocol.PacketServiceStartFailed{
+			_ = s.sendPacket(&protocol.PacketServiceStartFailed{
 				ServiceName: p.Service.Name,
 				Message:     fmt.Sprintf("failed to create service: %v", err),
 			})
@@ -150,7 +154,7 @@ func (s *slave) handlePacket(p proto.Message) error {
 		log.Printf("starting service %q", p.Service.Name)
 		err = s.svcm.startService(svc)
 		if err != nil {
-			_ = protocol.SendPacket(s.conn, &protocol.PacketServiceStartFailed{
+			_ = s.sendPacket(&protocol.PacketServiceStartFailed{
 				ServiceName: p.Service.Name,
 				Message:     fmt.Sprintf("failed to start service: %v", err),
 			})
@@ -168,6 +172,23 @@ func (s *slave) handlePacket(p proto.Message) error {
 		err := s.svcm.stopService(svc)
 		if err != nil {
 			log.Printf("failed to stop service %q: %v", p.ServiceName, err)
+			return nil
+		}
+
+	case *protocol.ServiceEnvelope:
+		svc := s.svcm.getService(p.ServiceName)
+		if svc == nil {
+			log.Printf("service %q not found", p.ServiceName)
+			return nil
+		}
+		msg, err := protocol.UnmarshalPayload(p.Payload)
+		if err != nil {
+			log.Printf("failed to unmarshal payload: %v", err)
+			return nil
+		}
+		err = svc.sendPacket(msg)
+		if err != nil {
+			log.Printf("failed to send packet to service %q: %v", svc.Name, err)
 			return nil
 		}
 	}

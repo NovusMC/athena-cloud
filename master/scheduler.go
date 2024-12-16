@@ -3,6 +3,8 @@ package main
 import (
 	"common"
 	"fmt"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 	"log"
 	"protocol"
 )
@@ -103,7 +105,7 @@ func (s *scheduler) stopService(svc *service) error {
 		return fmt.Errorf("service %q is not running", svc.Name)
 	}
 	svc.State = protocol.Service_STATE_STOPPING
-	err := protocol.SendPacket(svc.s.conn, &protocol.PacketStopService{
+	err := svc.s.sendPacket(&protocol.PacketStopService{
 		ServiceName: svc.Name,
 	})
 	if err != nil {
@@ -139,4 +141,18 @@ func (s *scheduler) getService(name string) *service {
 		}
 	}
 	return nil
+}
+
+func (svc *service) sendPacket(p proto.Message) error {
+	if svc.s == nil {
+		return fmt.Errorf("service %q is not running", svc.Name)
+	}
+	payload, err := anypb.New(p)
+	if err != nil {
+		return fmt.Errorf("failed to marshal packet: %v", err)
+	}
+	return svc.s.sendPacket(&protocol.ServiceEnvelope{
+		ServiceName: svc.Name,
+		Payload:     payload,
+	})
 }

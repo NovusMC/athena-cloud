@@ -57,7 +57,7 @@ loop:
 			cmd.svcCh <- connectedSvc
 			close(cmd.svcCh)
 		case serviceStoppedCmd:
-			err := protocol.SendPacket(s.conn, &protocol.PacketServiceStopped{
+			err := s.sendPacket(&protocol.PacketServiceStopped{
 				ServiceName: cmd.svc.Name,
 			})
 			if err != nil {

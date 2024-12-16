@@ -20,6 +20,7 @@ type slave struct {
 	conn          net.Conn
 	m             *master
 	name          string
+	host          string
 	authenticated bool
 	memory        int32
 	freeMemory    int32
@@ -30,7 +31,8 @@ func newSlaveManager(m *master) *slaveManager {
 }
 
 func (sm *slaveManager) newSlave(conn net.Conn) *slave {
-	slv := &slave{conn: conn, m: sm.m}
+	host, _ := common.SplitBindAddr(conn.RemoteAddr().String())
+	slv := &slave{conn: conn, m: sm.m, host: host}
 	sm.slaves = append(sm.slaves, slv)
 	return slv
 }
@@ -39,12 +41,12 @@ func (s *slave) handlePacketPreAuth(p proto.Message) error {
 	switch p := p.(type) {
 	case *protocol.PacketAuthenticate:
 		if p.SecretKey != s.m.cfg.SecretKey {
-			_ = protocol.SendPacket(s.conn, &protocol.PacketAuthFailed{Message: "invalid secret key"})
+			_ = s.sendPacket(&protocol.PacketAuthFailed{Message: "invalid secret key"})
 			return fmt.Errorf("invalid secret key")
 		}
 		slv := s.m.sm.getSlave(p.SlaveName)
 		if slv != nil {
-			_ = protocol.SendPacket(s.conn, &protocol.PacketAuthFailed{Message: "slave with name already exists"})
+			_ = s.sendPacket(&protocol.PacketAuthFailed{Message: "slave with name already exists"})
 			return fmt.Errorf("slave with name %q already exists", p.SlaveName)
 		}
 		s.name = p.SlaveName
@@ -52,7 +54,7 @@ func (s *slave) handlePacketPreAuth(p proto.Message) error {
 		s.freeMemory = p.Memory
 		s.authenticated = true
 		log.Printf("slave %q successfully authenticated", s.name)
-		err := protocol.SendPacket(s.conn, &protocol.PacketAuthSuccess{})
+		err := s.sendPacket(&protocol.PacketAuthSuccess{})
 		if err != nil {
 			return fmt.Errorf("failed to send auth success packet: %v", err)
 		}
@@ -88,6 +90,19 @@ func (s *slave) handlePacket(p proto.Message) error {
 			if err != nil {
 				fmt.Printf("failed to delete service %q: %v", svc.Service.Name, err)
 			}
+			if svc.Type == protocol.Service_TYPE_SERVER {
+				for _, prx := range s.m.sched.services {
+					if prx.Type != protocol.Service_TYPE_PROXY || prx.s == nil || prx.State != protocol.Service_STATE_ONLINE {
+						continue
+					}
+					err = prx.sendPacket(&protocol.PacketProxyUnregisterServer{
+						ServerName: svc.Name,
+					})
+					if err != nil {
+						log.Printf("failed to send proxy unregister server packet: %v", err)
+					}
+				}
+			}
 		}
 	case *protocol.PacketServiceOnline:
 		svc := s.m.sched.getService(p.ServiceName)
@@ -95,13 +110,42 @@ func (s *slave) handlePacket(p proto.Message) error {
 			svc.State = protocol.Service_STATE_ONLINE
 			svc.Port = p.Port
 			log.Printf("service %q on slave %q is now online", p.ServiceName, s.name)
+			if svc.Type == protocol.Service_TYPE_PROXY {
+				for _, srv := range s.m.sched.services {
+					if srv.Type != protocol.Service_TYPE_SERVER || srv.s == nil || srv.State != protocol.Service_STATE_ONLINE {
+						continue
+					}
+					err := svc.sendPacket(&protocol.PacketProxyRegisterServer{
+						ServerName: srv.Name,
+						Host:       srv.s.host,
+						Port:       srv.Port,
+					})
+					if err != nil {
+						log.Printf("failed to send proxy register server packet: %v", err)
+					}
+				}
+			} else if svc.Type == protocol.Service_TYPE_SERVER {
+				for _, prx := range s.m.sched.services {
+					if prx.Type != protocol.Service_TYPE_PROXY || prx.s == nil || prx.State != protocol.Service_STATE_ONLINE {
+						continue
+					}
+					err := prx.sendPacket(&protocol.PacketProxyRegisterServer{
+						ServerName: svc.Name,
+						Host:       svc.s.host,
+						Port:       svc.Port,
+					})
+					if err != nil {
+						log.Printf("failed to send proxy register server packet: %v", err)
+					}
+				}
+			}
 		}
 	}
 	return nil
 }
 
 func (s *slave) schedule(svc *service) {
-	_ = protocol.SendPacket(s.conn, &protocol.PacketScheduleServiceRequest{
+	_ = s.sendPacket(&protocol.PacketScheduleServiceRequest{
 		Service: svc.Service,
 		Group:   svc.g.Group,
 	})
@@ -178,4 +222,11 @@ func (s *slave) services() []*service {
 		}
 	}
 	return services
+}
+
+func (s *slave) sendPacket(p proto.Message) error {
+	if s.conn == nil {
+		return fmt.Errorf("not connected")
+	}
+	return protocol.SendPacket(s.conn, p)
 }

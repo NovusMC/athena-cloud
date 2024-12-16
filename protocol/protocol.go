@@ -60,7 +60,15 @@ func ReadPacket(r io.Reader) (proto.Message, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal envelope: %w", err)
 	}
-	typeName := strings.TrimPrefix(env.Payload.TypeUrl, "type.googleapis.com/")
+	msg, err := UnmarshalPayload(env.Payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal payload: %w", err)
+	}
+	return msg, nil
+}
+
+func UnmarshalPayload(payload *anypb.Any) (proto.Message, error) {
+	typeName := strings.TrimPrefix(payload.TypeUrl, "type.googleapis.com/")
 	if typeRegistry == nil {
 		typeRegistry = populateRegistry()
 	}
@@ -69,7 +77,7 @@ func ReadPacket(r io.Reader) (proto.Message, error) {
 		return nil, fmt.Errorf("unknown message type: %s", typeName)
 	}
 	message := factory()
-	if err := env.Payload.UnmarshalTo(message); err != nil {
+	if err := payload.UnmarshalTo(message); err != nil {
 		return nil, fmt.Errorf("failed to decode dynamic message: %w", err)
 	}
 	return message, nil

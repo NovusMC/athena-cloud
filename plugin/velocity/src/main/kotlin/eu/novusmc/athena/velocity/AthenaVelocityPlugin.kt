@@ -3,18 +3,24 @@ package eu.novusmc.athena.velocity
 import com.google.inject.Inject
 import com.google.protobuf.Message
 import com.velocitypowered.api.event.Subscribe
+import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Dependency
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.proxy.ProxyServer
+import com.velocitypowered.api.proxy.player.PlayerSettings
+import com.velocitypowered.api.proxy.server.RegisteredServer
+import com.velocitypowered.api.proxy.server.ServerInfo
 import de.pauhull.novus_utils.common.PluginConfig
+import eu.novusmc.athena.common.Configuration
 import eu.novusmc.athena.common.Packet
 import eu.novusmc.athena.common.Protocol
 import org.slf4j.Logger
 import java.io.File
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.net.Socket
-import java.net.SocketException
 
 @Plugin(
     id = "athena",
@@ -33,6 +39,9 @@ class AthenaVelocityPlugin @Inject constructor(
 
     @Subscribe
     fun onProxyInitialization(event: ProxyInitializeEvent) {
+        // unregister all servers from velocity.toml
+        server.allServers.map(RegisteredServer::getServerInfo).forEach(server::unregisterServer)
+
         try {
             val cfg = PluginConfig.copyAndLoad(Configuration::class.java, File("plugins/athena/config.json"))
 
@@ -79,7 +88,27 @@ class AthenaVelocityPlugin @Inject constructor(
         sock?.close()
     }
 
+    @Subscribe
+    fun onPlayerChooseInitialServer(event: PlayerChooseInitialServerEvent) {
+        event.setInitialServer(server.allServers.firstOrNull())
+    }
+
     private fun handlePacket(p: Message) {
-        logger.info("Received packet: ${p.javaClass.name}")
+        when (p) {
+            is Protocol.PacketProxyRegisterServer -> {
+                logger.info("Registering server ${p.serverName} at ${p.host}:${p.port}")
+                server.registerServer(ServerInfo(
+                    p.serverName,
+                    InetSocketAddress.createUnresolved(p.host, p.port)
+                ))
+            }
+            is Protocol.PacketProxyUnregisterServer -> {
+                logger.info("Unregistering server ${p.serverName}")
+                val srv = server.getServer(p.serverName)
+                if (srv.isPresent) {
+                    server.unregisterServer(srv.get().serverInfo)
+                }
+            }
+        }
     }
 }

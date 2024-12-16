@@ -17,6 +17,8 @@ var (
 	athenaKotlinStdlibJar []byte
 	//go:embed assets/athena-velocity.jar
 	athenaVelocityJar []byte
+	//go:embed assets/athena-paper.jar
+	athenaPaperJar []byte
 )
 
 type templateManager struct {
@@ -41,7 +43,7 @@ func (tmpl *templateManager) init() error {
 	if err != nil {
 		return fmt.Errorf("failed to create template directory: %w", err)
 	}
-	templates := []string{"global_all/plugins", "global_proxy/plugins", "global_server"}
+	templates := []string{"global_all/plugins", "global_proxy/plugins", "global_server/plugins"}
 	for _, g := range tmpl.m.gm.groups {
 		templates = append(templates, g.Name)
 	}
@@ -58,6 +60,14 @@ func (tmpl *templateManager) init() error {
 	err = os.WriteFile(path.Join(tmpl.templateDir, "global_proxy/plugins", "athena-velocity.jar"), athenaVelocityJar, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write athena-velocity.jar: %w", err)
+	}
+	err = os.WriteFile(path.Join(tmpl.templateDir, "global_server/plugins", "athena-paper.jar"), athenaPaperJar, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write athena-paper.jar: %w", err)
+	}
+	err = os.WriteFile(path.Join(tmpl.templateDir, "global_server", "eula.txt"), []byte("eula=true\n"), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write eula.txt: %w", err)
 	}
 	return nil
 }
