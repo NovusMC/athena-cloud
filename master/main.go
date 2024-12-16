@@ -1,8 +1,8 @@
 package main
 
 import (
-	"errors"
 	"fmt"
+	"github.com/ergochat/readline"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v3"
 	"io"
@@ -12,8 +12,6 @@ import (
 	"time"
 
 	"common"
-
-	"github.com/chzyer/readline"
 )
 
 type master struct {
@@ -24,12 +22,12 @@ type master struct {
 	tmpl  *templateManager
 	term  io.Writer
 	cli   *cli.Command
+	sc    *screen
 }
 
 type config struct {
 	BindAddr           string `json:"bind_addr"`
 	FileServerBindAddr string `json:"file_server_bind_addr"`
-	MinecraftBindAddr  string `json:"minecraft_bind_addr"`
 	SecretKey          string `json:"secret_key"`
 }
 
@@ -48,7 +46,6 @@ func main() {
 	m.cfg, err = common.ReadConfig("master.yaml", config{
 		BindAddr:           "0.0.0.0:5000",
 		FileServerBindAddr: "0.0.0.0:5001",
-		MinecraftBindAddr:  "0.0.0.0:25565",
 		SecretKey:          common.GenerateRandomHex(32),
 	})
 	if err != nil {
@@ -65,6 +62,7 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 
+	m.sc = newScreen()
 	m.sm = newSlaveManager(&m)
 	m.sched = newScheduler(&m)
 	m.cli = newCli(ch, &m)
@@ -102,19 +100,14 @@ func main() {
 	l.CaptureExitSignal()
 	log.SetOutput(l.Stderr())
 	m.term = l.Stderr()
+	defer func() {
+		_ = l.Close()
+	}()
 
+	running := true
 	go func() {
-		for {
-			line, err := l.Readline()
-			if err != nil {
-				if errors.Is(err, readline.ErrInterrupt) {
-					continue
-				}
-				if !errors.Is(err, io.EOF) {
-					log.Printf("error reading line: %v", err)
-				}
-				break
-			}
+		for running {
+			line, _ := l.Readline()
 			line = strings.TrimSpace(line)
 			if line == "" {
 				continue
@@ -126,6 +119,7 @@ func main() {
 	}()
 
 	m.runCommandQueue(ch)
+	running = false
 
 	log.Printf("shutting down")
 }

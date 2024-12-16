@@ -9,7 +9,6 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Dependency
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.proxy.ProxyServer
-import com.velocitypowered.api.proxy.player.PlayerSettings
 import com.velocitypowered.api.proxy.server.RegisteredServer
 import com.velocitypowered.api.proxy.server.ServerInfo
 import de.pauhull.novus_utils.common.PluginConfig
@@ -18,7 +17,6 @@ import eu.novusmc.athena.common.Packet
 import eu.novusmc.athena.common.Protocol
 import org.slf4j.Logger
 import java.io.File
-import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
 

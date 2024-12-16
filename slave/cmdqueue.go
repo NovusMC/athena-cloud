@@ -49,7 +49,7 @@ loop:
 		case serviceConnectCmd:
 			var connectedSvc *service
 			for _, svc := range s.svcm.services {
-				if svc.conn == nil && cmd.key == svc.key {
+				if svc.conn == nil && cmd.key == svc.key && svc.State == protocol.Service_STATE_SCHEDULED {
 					s.svcm.setConnected(svc, cmd.conn)
 					connectedSvc = svc
 				}

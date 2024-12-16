@@ -38,10 +38,11 @@ func (gm *groupManager) loadGroups() error {
 	if err != nil {
 		return fmt.Errorf("failed to load group files: %w", err)
 	}
+	var errs []error
 	for _, g := range groupInfos {
 		gm.groups = append(gm.groups, &group{Group: g})
 	}
-	return nil
+	return errors.Join(errs...)
 }
 
 func (gm *groupManager) reloadGroups() error {
@@ -53,19 +54,27 @@ func (gm *groupManager) reloadGroups() error {
 	for _, g := range groupInfos {
 		m[g.Name] = g
 	}
+	var errs []error
 	for _, g := range gm.groups {
 		info, exists := m[g.Name]
 		delete(m, g.Name)
 		if !exists {
-			gm.deleteGroup(g)
+			err = gm.deleteGroup(g)
+			if err != nil {
+				errs = append(errs, fmt.Errorf("failed to delete group %q: %w", g.Name, err))
+			}
 		} else {
 			g.Group = info
 		}
 	}
 	for _, g := range m {
 		gm.groups = append(gm.groups, &group{Group: g})
+		err = gm.m.tmpl.createTemplateDir(g.Name)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("failed to create template directory: %w", err))
+		}
 	}
-	return nil
+	return errors.Join(errs...)
 }
 
 func (gm *groupManager) loadGroupInfos() ([]*protocol.Group, error) {

@@ -144,21 +144,27 @@ func (s *slave) handlePacket(p proto.Message) error {
 		log.Printf("asked to schedule service %s", p.Service.Name)
 		svc, err := s.svcm.createService(p.Service, p.Group)
 		if err != nil {
-			_ = s.sendPacket(&protocol.PacketServiceStartFailed{
+			log.Printf("failed to schedule service %s: %v", p.Service.Name, err)
+			err = s.sendPacket(&protocol.PacketServiceStartFailed{
 				ServiceName: p.Service.Name,
 				Message:     fmt.Sprintf("failed to create service: %v", err),
 			})
-			log.Printf("failed to schedule service %s: %v", p.Service.Name, err)
+			if err != nil {
+				return fmt.Errorf("failed to send packet: %w", err)
+			}
 			return nil
 		}
 		log.Printf("starting service %q", p.Service.Name)
 		err = s.svcm.startService(svc)
 		if err != nil {
-			_ = s.sendPacket(&protocol.PacketServiceStartFailed{
+			log.Printf("failed to start service %q: %v", p.Service.Name, err)
+			err = s.sendPacket(&protocol.PacketServiceStartFailed{
 				ServiceName: p.Service.Name,
 				Message:     fmt.Sprintf("failed to start service: %v", err),
 			})
-			log.Printf("failed to start service %q: %v", p.Service.Name, err)
+			if err != nil {
+				return fmt.Errorf("failed to send packet: %w", err)
+			}
 			return nil
 		}
 
@@ -188,7 +194,48 @@ func (s *slave) handlePacket(p proto.Message) error {
 		}
 		err = svc.sendPacket(msg)
 		if err != nil {
-			log.Printf("failed to send packet to service %q: %v", svc.Name, err)
+			return fmt.Errorf("failed to send packet: %w", err)
+		}
+
+	case *protocol.PacketAttachScreen:
+		svc := s.svcm.getService(p.ServiceName)
+		if svc == nil {
+			log.Printf("service %q not found", p.ServiceName)
+			return nil
+		}
+		svc.sc.mu.Lock()
+		err := s.sendPacket(&protocol.PacketScreenLine{
+			Line: strings.Join(svc.sc.lines, "\n"),
+		})
+		svc.sc.report = true
+		svc.sc.mu.Unlock()
+		if err != nil {
+			return fmt.Errorf("failed to send packet: %w", err)
+		}
+
+	case *protocol.PacketDetachScreen:
+		svc := s.svcm.getService(p.ServiceName)
+		if svc == nil {
+			log.Printf("service %q not found", p.ServiceName)
+			return nil
+		}
+		svc.sc.mu.Lock()
+		svc.sc.report = false
+		svc.sc.mu.Unlock()
+
+	case *protocol.PacketExecuteServiceCommand:
+		svc := s.svcm.getService(p.ServiceName)
+		if svc == nil {
+			log.Printf("service %q not found", p.ServiceName)
+			return nil
+		}
+		if svc.w == nil {
+			log.Printf("service %q is not writeable", p.ServiceName)
+			return nil
+		}
+		_, err := svc.w.Write([]byte(p.Command + "\n"))
+		if err != nil {
+			log.Printf("failed to write to service %q: %v", p.ServiceName, err)
 			return nil
 		}
 	}

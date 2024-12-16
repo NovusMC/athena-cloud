@@ -96,3 +96,20 @@ message PacketProxyRegisterServer {
 message PacketProxyUnregisterServer {
   string server_name = 1;
 }
+
+message PacketScreenLine {
+  string line = 1;
+}
+
+message PacketAttachScreen {
+  string service_name = 1;
+}
+
+message PacketDetachScreen {
+  string service_name = 1;
+}
+
+message PacketExecuteServiceCommand {
+  string service_name = 1;
+  string command = 2;
+}

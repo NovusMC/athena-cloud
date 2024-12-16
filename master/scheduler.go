@@ -120,7 +120,14 @@ func (s *scheduler) deleteService(svc *service) error {
 		svc.State == protocol.Service_STATE_STOPPING {
 		return fmt.Errorf("service %q is in state %s", svc.Name, svc.State)
 	}
+	svc.State = protocol.Service_STATE_OFFLINE
 	s.services = common.DeleteItem(s.services, svc)
+	if s.m.sc.svc == svc {
+		err := s.m.sc.detach()
+		if err != nil {
+			return fmt.Errorf("failed to detach screen: %v", err)
+		}
+	}
 	log.Printf("service %q deleted", svc.Name)
 	return nil
 }

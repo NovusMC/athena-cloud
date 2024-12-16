@@ -3,6 +3,7 @@ package main
 import (
 	"common"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/urfave/cli/v3"
 	"log"
@@ -37,6 +38,7 @@ func newCli(ch chan<- any, m *master) *cli.Command {
 					newGroupCreateCmd(m),
 					newGroupListCmd(m),
 					newGroupReloadCmd(m),
+					newGroupRestartCmd(m),
 				},
 			},
 			{
@@ -46,11 +48,44 @@ func newCli(ch chan<- any, m *master) *cli.Command {
 				Commands: []*cli.Command{
 					newServiceStopCmd(m),
 					newServiceListCmd(m),
+					newServiceScreenCmd(m),
 				},
 			},
 		},
 	}
 
+	return cmd
+}
+
+func newServiceScreenCmd(m *master) *cli.Command {
+	var svcName string
+	cmd := &cli.Command{
+		Name:  "screen",
+		Usage: "Attach to service screen",
+		Arguments: []cli.Argument{
+			&cli.StringArg{
+				Name:        "<service>",
+				Destination: &svcName,
+				Min:         1,
+				Max:         1,
+			},
+		},
+		Action: func(ctx context.Context, command *cli.Command) error {
+			if m.sc.svc != nil {
+				return fmt.Errorf("already attached to a service")
+			}
+			svc := m.sched.getService(svcName)
+			if svc == nil {
+				return fmt.Errorf("unknown service: %s", svcName)
+			}
+			err := m.sc.attach(svc)
+			if err != nil {
+				return fmt.Errorf("cannot attach to service: %w", err)
+			}
+			log.Println("enter 'leave' to detach from service")
+			return nil
+		},
+	}
 	return cmd
 }
 
@@ -61,7 +96,7 @@ func newServiceStopCmd(m *master) *cli.Command {
 		Usage: "Stops a service",
 		Arguments: []cli.Argument{
 			&cli.StringArg{
-				Name:        "<name>",
+				Name:        "<service>",
 				Destination: &svcName,
 				Min:         1,
 				Max:         1,
@@ -97,6 +132,41 @@ func newServiceListCmd(m *master) *cli.Command {
 				return fmt.Errorf("cannot marshal services: %w", err)
 			}
 			return nil
+		},
+	}
+	return cmd
+}
+
+func newGroupRestartCmd(m *master) *cli.Command {
+	var groupName string
+	cmd := &cli.Command{
+		Name:  "restart",
+		Usage: "Restart group",
+		Arguments: []cli.Argument{
+			&cli.StringArg{
+				Name:        "<group>",
+				Destination: &groupName,
+				Min:         1,
+				Max:         1,
+			},
+		},
+		Action: func(ctx context.Context, command *cli.Command) error {
+			g := m.gm.getGroup(groupName)
+			if g == nil {
+				return fmt.Errorf("unknown group: %s", groupName)
+			}
+			log.Printf("restarting group %q", g.Name)
+			var errs []error
+			for _, svc := range m.gm.services(g) {
+				if svc.s == nil || (svc.State != protocol.Service_STATE_ONLINE && svc.State != protocol.Service_STATE_SCHEDULED) {
+					continue
+				}
+				err := m.sched.stopService(svc)
+				if err != nil {
+					errs = append(errs, fmt.Errorf("failed to stop service %q: %w", svc.Name, err))
+				}
+			}
+			return errors.Join(errs...)
 		},
 	}
 	return cmd

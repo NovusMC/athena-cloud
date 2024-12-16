@@ -4,11 +4,13 @@ import (
 	"common"
 	"errors"
 	"fmt"
+	"github.com/fatih/color"
 	"google.golang.org/protobuf/proto"
 	"io"
 	"log"
 	"net"
 	"protocol"
+	"strings"
 )
 
 type slaveManager struct {
@@ -139,6 +141,15 @@ func (s *slave) handlePacket(p proto.Message) error {
 					}
 				}
 			}
+		}
+	case *protocol.PacketScreenLine:
+		if s.m.sc.svc == nil {
+			return nil
+		}
+		lines := strings.Split(p.Line, "\n")
+		log2 := log.New(log.Writer(), color.BlueString("[%s] ", s.m.sc.svc.Name), log.Flags()&^log.Ltime&^log.Ldate)
+		for _, line := range lines {
+			log2.Println(line)
 		}
 	}
 	return nil

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"common"
 	"encoding/json"
 	"errors"
@@ -15,6 +16,7 @@ import (
 	"path/filepath"
 	"protocol"
 	"strconv"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -51,6 +53,12 @@ func (svcm *serviceManager) init() error {
 	return nil
 }
 
+type screen struct {
+	mu     sync.Mutex
+	lines  []string
+	report bool
+}
+
 type service struct {
 	*protocol.Service
 	g    *protocol.Group
@@ -58,6 +66,8 @@ type service struct {
 	dir  string
 	key  string
 	cmd  *exec.Cmd
+	w    io.Writer
+	sc   *screen
 }
 
 func (svcm *serviceManager) setConnected(svc *service, conn net.Conn) {
@@ -75,6 +85,7 @@ func (svcm *serviceManager) createService(protoService *protocol.Service, group 
 		Service: protoService,
 		g:       group,
 		key:     common.GenerateRandomHex(32),
+		sc:      &screen{},
 	}
 
 	svc.dir = path.Join(svcm.tmpDir, fmt.Sprintf("%s-%s", svc.Name, common.GenerateRandomHex(3)))
@@ -155,8 +166,40 @@ func (svcm *serviceManager) startService(svc *service) error {
 	if err != nil {
 		return fmt.Errorf("failed to get absolute path: %w", err)
 	}
-	svc.cmd.Stdout = os.Stdout
-	svc.cmd.Stderr = os.Stderr
+
+	outReader, outWriter := io.Pipe()
+	inReader, inWriter := io.Pipe()
+	scanner := bufio.NewReader(outReader)
+	sc := svc.sc
+	go func() {
+		for {
+			line, _, err := scanner.ReadLine()
+			if err != nil {
+				if !errors.Is(err, io.EOF) {
+					log.Printf("failed to read line: %v", err)
+				}
+				break
+			}
+			sc.mu.Lock()
+			sc.lines = append(sc.lines, string(line))
+			if len(sc.lines) > 100 {
+				sc.lines = sc.lines[len(sc.lines)-100:]
+			}
+			if sc.report {
+				err := svcm.s.sendPacket(&protocol.PacketScreenLine{
+					Line: string(line),
+				})
+				if err != nil {
+					log.Printf("failed to send screen line: %v", err)
+				}
+			}
+			sc.mu.Unlock()
+		}
+	}()
+	svc.cmd.Stdin = inReader
+	svc.cmd.Stdout = outWriter
+	svc.cmd.Stderr = outWriter
+	svc.w = inWriter
 	err = svc.cmd.Start()
 	if err != nil {
 		return fmt.Errorf("failed to start service: %w", err)
@@ -164,6 +207,11 @@ func (svcm *serviceManager) startService(svc *service) error {
 
 	go func() {
 		err := svc.cmd.Wait()
+		// close pipes
+		_ = outReader.Close()
+		_ = outWriter.Close()
+		_ = inReader.Close()
+		_ = inWriter.Close()
 		if err != nil && err.Error() != "exit status 143" { // 143: exited by SIGTERM
 			log.Printf("service %s exited with error: %v", svc.Name, err)
 		} else {
@@ -178,10 +226,16 @@ func (svcm *serviceManager) stopService(svc *service) error {
 	if svc.cmd == nil {
 		return fmt.Errorf("service is not running")
 	}
+	svc.State = protocol.Service_STATE_STOPPING
 	err := svc.cmd.Process.Signal(syscall.SIGTERM)
 	if err != nil {
 		return fmt.Errorf("failed to stop service: %w", err)
 	}
+	proc := svc.cmd.Process
+	go func() {
+		time.Sleep(20 * time.Second)
+		_ = proc.Kill()
+	}()
 	return nil
 }
 

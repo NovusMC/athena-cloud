@@ -946,6 +946,194 @@ func (x *PacketProxyUnregisterServer) GetServerName() string {
 	return ""
 }
 
+type PacketScreenLine struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Line string `protobuf:"bytes,1,opt,name=line,proto3" json:"line,omitempty"`
+}
+
+func (x *PacketScreenLine) Reset() {
+	*x = PacketScreenLine{}
+	mi := &file_protocol_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PacketScreenLine) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PacketScreenLine) ProtoMessage() {}
+
+func (x *PacketScreenLine) ProtoReflect() protoreflect.Message {
+	mi := &file_protocol_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PacketScreenLine.ProtoReflect.Descriptor instead.
+func (*PacketScreenLine) Descriptor() ([]byte, []int) {
+	return file_protocol_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *PacketScreenLine) GetLine() string {
+	if x != nil {
+		return x.Line
+	}
+	return ""
+}
+
+type PacketAttachScreen struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ServiceName string `protobuf:"bytes,1,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
+}
+
+func (x *PacketAttachScreen) Reset() {
+	*x = PacketAttachScreen{}
+	mi := &file_protocol_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PacketAttachScreen) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PacketAttachScreen) ProtoMessage() {}
+
+func (x *PacketAttachScreen) ProtoReflect() protoreflect.Message {
+	mi := &file_protocol_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PacketAttachScreen.ProtoReflect.Descriptor instead.
+func (*PacketAttachScreen) Descriptor() ([]byte, []int) {
+	return file_protocol_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *PacketAttachScreen) GetServiceName() string {
+	if x != nil {
+		return x.ServiceName
+	}
+	return ""
+}
+
+type PacketDetachScreen struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ServiceName string `protobuf:"bytes,1,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
+}
+
+func (x *PacketDetachScreen) Reset() {
+	*x = PacketDetachScreen{}
+	mi := &file_protocol_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PacketDetachScreen) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PacketDetachScreen) ProtoMessage() {}
+
+func (x *PacketDetachScreen) ProtoReflect() protoreflect.Message {
+	mi := &file_protocol_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PacketDetachScreen.ProtoReflect.Descriptor instead.
+func (*PacketDetachScreen) Descriptor() ([]byte, []int) {
+	return file_protocol_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *PacketDetachScreen) GetServiceName() string {
+	if x != nil {
+		return x.ServiceName
+	}
+	return ""
+}
+
+type PacketExecuteServiceCommand struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ServiceName string `protobuf:"bytes,1,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
+	Command     string `protobuf:"bytes,2,opt,name=command,proto3" json:"command,omitempty"`
+}
+
+func (x *PacketExecuteServiceCommand) Reset() {
+	*x = PacketExecuteServiceCommand{}
+	mi := &file_protocol_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PacketExecuteServiceCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PacketExecuteServiceCommand) ProtoMessage() {}
+
+func (x *PacketExecuteServiceCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_protocol_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PacketExecuteServiceCommand.ProtoReflect.Descriptor instead.
+func (*PacketExecuteServiceCommand) Descriptor() ([]byte, []int) {
+	return file_protocol_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *PacketExecuteServiceCommand) GetServiceName() string {
+	if x != nil {
+		return x.ServiceName
+	}
+	return ""
+}
+
+func (x *PacketExecuteServiceCommand) GetCommand() string {
+	if x != nil {
+		return x.Command
+	}
+	return ""
+}
+
 var File_protocol_proto protoreflect.FileDescriptor
 
 var file_protocol_proto_rawDesc = []byte{
@@ -1048,10 +1236,25 @@ var file_protocol_proto_rawDesc = []byte{
 	0x50, 0x72, 0x6f, 0x78, 0x79, 0x55, 0x6e, 0x72, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x53,
 	0x65, 0x72, 0x76, 0x65, 0x72, 0x12, 0x1f, 0x0a, 0x0b, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x5f,
 	0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x73, 0x65, 0x72, 0x76,
-	0x65, 0x72, 0x4e, 0x61, 0x6d, 0x65, 0x42, 0x25, 0x0a, 0x18, 0x65, 0x75, 0x2e, 0x6e, 0x6f, 0x76,
-	0x75, 0x73, 0x6d, 0x63, 0x2e, 0x61, 0x74, 0x68, 0x65, 0x6e, 0x61, 0x2e, 0x63, 0x6f, 0x6d, 0x6d,
-	0x6f, 0x6e, 0x5a, 0x09, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2f, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x72, 0x4e, 0x61, 0x6d, 0x65, 0x22, 0x26, 0x0a, 0x10, 0x50, 0x61, 0x63, 0x6b, 0x65, 0x74,
+	0x53, 0x63, 0x72, 0x65, 0x65, 0x6e, 0x4c, 0x69, 0x6e, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x6c, 0x69,
+	0x6e, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6c, 0x69, 0x6e, 0x65, 0x22, 0x37,
+	0x0a, 0x12, 0x50, 0x61, 0x63, 0x6b, 0x65, 0x74, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x53, 0x63,
+	0x72, 0x65, 0x65, 0x6e, 0x12, 0x21, 0x0a, 0x0c, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x5f,
+	0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x73, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x22, 0x37, 0x0a, 0x12, 0x50, 0x61, 0x63, 0x6b, 0x65,
+	0x74, 0x44, 0x65, 0x74, 0x61, 0x63, 0x68, 0x53, 0x63, 0x72, 0x65, 0x65, 0x6e, 0x12, 0x21, 0x0a,
+	0x0c, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x0b, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x4e, 0x61, 0x6d, 0x65,
+	0x22, 0x5a, 0x0a, 0x1b, 0x50, 0x61, 0x63, 0x6b, 0x65, 0x74, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74,
+	0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12,
+	0x21, 0x0a, 0x0c, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x4e, 0x61,
+	0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x42, 0x25, 0x0a, 0x18,
+	0x65, 0x75, 0x2e, 0x6e, 0x6f, 0x76, 0x75, 0x73, 0x6d, 0x63, 0x2e, 0x61, 0x74, 0x68, 0x65, 0x6e,
+	0x61, 0x2e, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x5a, 0x09, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63,
+	0x6f, 0x6c, 0x2f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1067,7 +1270,7 @@ func file_protocol_proto_rawDescGZIP() []byte {
 }
 
 var file_protocol_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_protocol_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_protocol_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_protocol_proto_goTypes = []any{
 	(Service_Type)(0),                    // 0: protocol.Service.Type
 	(Service_State)(0),                   // 1: protocol.Service.State
@@ -1086,14 +1289,18 @@ var file_protocol_proto_goTypes = []any{
 	(*PacketStopService)(nil),            // 14: protocol.PacketStopService
 	(*PacketProxyRegisterServer)(nil),    // 15: protocol.PacketProxyRegisterServer
 	(*PacketProxyUnregisterServer)(nil),  // 16: protocol.PacketProxyUnregisterServer
-	(*anypb.Any)(nil),                    // 17: google.protobuf.Any
+	(*PacketScreenLine)(nil),             // 17: protocol.PacketScreenLine
+	(*PacketAttachScreen)(nil),           // 18: protocol.PacketAttachScreen
+	(*PacketDetachScreen)(nil),           // 19: protocol.PacketDetachScreen
+	(*PacketExecuteServiceCommand)(nil),  // 20: protocol.PacketExecuteServiceCommand
+	(*anypb.Any)(nil),                    // 21: google.protobuf.Any
 }
 var file_protocol_proto_depIdxs = []int32{
 	0,  // 0: protocol.Service.type:type_name -> protocol.Service.Type
 	1,  // 1: protocol.Service.state:type_name -> protocol.Service.State
 	0,  // 2: protocol.Group.type:type_name -> protocol.Service.Type
-	17, // 3: protocol.Envelope.payload:type_name -> google.protobuf.Any
-	17, // 4: protocol.ServiceEnvelope.payload:type_name -> google.protobuf.Any
+	21, // 3: protocol.Envelope.payload:type_name -> google.protobuf.Any
+	21, // 4: protocol.ServiceEnvelope.payload:type_name -> google.protobuf.Any
 	2,  // 5: protocol.PacketScheduleServiceRequest.service:type_name -> protocol.Service
 	3,  // 6: protocol.PacketScheduleServiceRequest.group:type_name -> protocol.Group
 	7,  // [7:7] is the sub-list for method output_type
@@ -1114,7 +1321,7 @@ func file_protocol_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_protocol_proto_rawDesc,
 			NumEnums:      2,
-			NumMessages:   15,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -10030,6 +10030,2194 @@ public final class Protocol {
 
   }
 
+  public interface PacketScreenLineOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:protocol.PacketScreenLine)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string line = 1;</code>
+     * @return The line.
+     */
+    java.lang.String getLine();
+    /**
+     * <code>string line = 1;</code>
+     * @return The bytes for line.
+     */
+    com.google.protobuf.ByteString
+        getLineBytes();
+  }
+  /**
+   * Protobuf type {@code protocol.PacketScreenLine}
+   */
+  public static final class PacketScreenLine extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:protocol.PacketScreenLine)
+      PacketScreenLineOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 29,
+        /* patch= */ 1,
+        /* suffix= */ "",
+        PacketScreenLine.class.getName());
+    }
+    // Use PacketScreenLine.newBuilder() to construct.
+    private PacketScreenLine(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private PacketScreenLine() {
+      line_ = "";
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketScreenLine_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketScreenLine_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              eu.novusmc.athena.common.Protocol.PacketScreenLine.class, eu.novusmc.athena.common.Protocol.PacketScreenLine.Builder.class);
+    }
+
+    public static final int LINE_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object line_ = "";
+    /**
+     * <code>string line = 1;</code>
+     * @return The line.
+     */
+    @java.lang.Override
+    public java.lang.String getLine() {
+      java.lang.Object ref = line_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        line_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string line = 1;</code>
+     * @return The bytes for line.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getLineBytes() {
+      java.lang.Object ref = line_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        line_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(line_)) {
+        com.google.protobuf.GeneratedMessage.writeString(output, 1, line_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(line_)) {
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(1, line_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof eu.novusmc.athena.common.Protocol.PacketScreenLine)) {
+        return super.equals(obj);
+      }
+      eu.novusmc.athena.common.Protocol.PacketScreenLine other = (eu.novusmc.athena.common.Protocol.PacketScreenLine) obj;
+
+      if (!getLine()
+          .equals(other.getLine())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + LINE_FIELD_NUMBER;
+      hash = (53 * hash) + getLine().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketScreenLine parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketScreenLine parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketScreenLine parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketScreenLine parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketScreenLine parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketScreenLine parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketScreenLine parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketScreenLine parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketScreenLine parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketScreenLine parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketScreenLine parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketScreenLine parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(eu.novusmc.athena.common.Protocol.PacketScreenLine prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code protocol.PacketScreenLine}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:protocol.PacketScreenLine)
+        eu.novusmc.athena.common.Protocol.PacketScreenLineOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketScreenLine_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketScreenLine_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                eu.novusmc.athena.common.Protocol.PacketScreenLine.class, eu.novusmc.athena.common.Protocol.PacketScreenLine.Builder.class);
+      }
+
+      // Construct using eu.novusmc.athena.common.Protocol.PacketScreenLine.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        line_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketScreenLine_descriptor;
+      }
+
+      @java.lang.Override
+      public eu.novusmc.athena.common.Protocol.PacketScreenLine getDefaultInstanceForType() {
+        return eu.novusmc.athena.common.Protocol.PacketScreenLine.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public eu.novusmc.athena.common.Protocol.PacketScreenLine build() {
+        eu.novusmc.athena.common.Protocol.PacketScreenLine result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public eu.novusmc.athena.common.Protocol.PacketScreenLine buildPartial() {
+        eu.novusmc.athena.common.Protocol.PacketScreenLine result = new eu.novusmc.athena.common.Protocol.PacketScreenLine(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(eu.novusmc.athena.common.Protocol.PacketScreenLine result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.line_ = line_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof eu.novusmc.athena.common.Protocol.PacketScreenLine) {
+          return mergeFrom((eu.novusmc.athena.common.Protocol.PacketScreenLine)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(eu.novusmc.athena.common.Protocol.PacketScreenLine other) {
+        if (other == eu.novusmc.athena.common.Protocol.PacketScreenLine.getDefaultInstance()) return this;
+        if (!other.getLine().isEmpty()) {
+          line_ = other.line_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                line_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object line_ = "";
+      /**
+       * <code>string line = 1;</code>
+       * @return The line.
+       */
+      public java.lang.String getLine() {
+        java.lang.Object ref = line_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          line_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string line = 1;</code>
+       * @return The bytes for line.
+       */
+      public com.google.protobuf.ByteString
+          getLineBytes() {
+        java.lang.Object ref = line_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          line_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string line = 1;</code>
+       * @param value The line to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLine(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        line_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string line = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLine() {
+        line_ = getDefaultInstance().getLine();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string line = 1;</code>
+       * @param value The bytes for line to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLineBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        line_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:protocol.PacketScreenLine)
+    }
+
+    // @@protoc_insertion_point(class_scope:protocol.PacketScreenLine)
+    private static final eu.novusmc.athena.common.Protocol.PacketScreenLine DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new eu.novusmc.athena.common.Protocol.PacketScreenLine();
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketScreenLine getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<PacketScreenLine>
+        PARSER = new com.google.protobuf.AbstractParser<PacketScreenLine>() {
+      @java.lang.Override
+      public PacketScreenLine parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<PacketScreenLine> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PacketScreenLine> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public eu.novusmc.athena.common.Protocol.PacketScreenLine getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface PacketAttachScreenOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:protocol.PacketAttachScreen)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string service_name = 1;</code>
+     * @return The serviceName.
+     */
+    java.lang.String getServiceName();
+    /**
+     * <code>string service_name = 1;</code>
+     * @return The bytes for serviceName.
+     */
+    com.google.protobuf.ByteString
+        getServiceNameBytes();
+  }
+  /**
+   * Protobuf type {@code protocol.PacketAttachScreen}
+   */
+  public static final class PacketAttachScreen extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:protocol.PacketAttachScreen)
+      PacketAttachScreenOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 29,
+        /* patch= */ 1,
+        /* suffix= */ "",
+        PacketAttachScreen.class.getName());
+    }
+    // Use PacketAttachScreen.newBuilder() to construct.
+    private PacketAttachScreen(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private PacketAttachScreen() {
+      serviceName_ = "";
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketAttachScreen_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketAttachScreen_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              eu.novusmc.athena.common.Protocol.PacketAttachScreen.class, eu.novusmc.athena.common.Protocol.PacketAttachScreen.Builder.class);
+    }
+
+    public static final int SERVICE_NAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object serviceName_ = "";
+    /**
+     * <code>string service_name = 1;</code>
+     * @return The serviceName.
+     */
+    @java.lang.Override
+    public java.lang.String getServiceName() {
+      java.lang.Object ref = serviceName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        serviceName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string service_name = 1;</code>
+     * @return The bytes for serviceName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getServiceNameBytes() {
+      java.lang.Object ref = serviceName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        serviceName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(serviceName_)) {
+        com.google.protobuf.GeneratedMessage.writeString(output, 1, serviceName_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(serviceName_)) {
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(1, serviceName_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof eu.novusmc.athena.common.Protocol.PacketAttachScreen)) {
+        return super.equals(obj);
+      }
+      eu.novusmc.athena.common.Protocol.PacketAttachScreen other = (eu.novusmc.athena.common.Protocol.PacketAttachScreen) obj;
+
+      if (!getServiceName()
+          .equals(other.getServiceName())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + SERVICE_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getServiceName().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketAttachScreen parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketAttachScreen parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketAttachScreen parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketAttachScreen parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketAttachScreen parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketAttachScreen parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketAttachScreen parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketAttachScreen parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketAttachScreen parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketAttachScreen parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketAttachScreen parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketAttachScreen parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(eu.novusmc.athena.common.Protocol.PacketAttachScreen prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code protocol.PacketAttachScreen}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:protocol.PacketAttachScreen)
+        eu.novusmc.athena.common.Protocol.PacketAttachScreenOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketAttachScreen_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketAttachScreen_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                eu.novusmc.athena.common.Protocol.PacketAttachScreen.class, eu.novusmc.athena.common.Protocol.PacketAttachScreen.Builder.class);
+      }
+
+      // Construct using eu.novusmc.athena.common.Protocol.PacketAttachScreen.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        serviceName_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketAttachScreen_descriptor;
+      }
+
+      @java.lang.Override
+      public eu.novusmc.athena.common.Protocol.PacketAttachScreen getDefaultInstanceForType() {
+        return eu.novusmc.athena.common.Protocol.PacketAttachScreen.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public eu.novusmc.athena.common.Protocol.PacketAttachScreen build() {
+        eu.novusmc.athena.common.Protocol.PacketAttachScreen result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public eu.novusmc.athena.common.Protocol.PacketAttachScreen buildPartial() {
+        eu.novusmc.athena.common.Protocol.PacketAttachScreen result = new eu.novusmc.athena.common.Protocol.PacketAttachScreen(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(eu.novusmc.athena.common.Protocol.PacketAttachScreen result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.serviceName_ = serviceName_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof eu.novusmc.athena.common.Protocol.PacketAttachScreen) {
+          return mergeFrom((eu.novusmc.athena.common.Protocol.PacketAttachScreen)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(eu.novusmc.athena.common.Protocol.PacketAttachScreen other) {
+        if (other == eu.novusmc.athena.common.Protocol.PacketAttachScreen.getDefaultInstance()) return this;
+        if (!other.getServiceName().isEmpty()) {
+          serviceName_ = other.serviceName_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                serviceName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object serviceName_ = "";
+      /**
+       * <code>string service_name = 1;</code>
+       * @return The serviceName.
+       */
+      public java.lang.String getServiceName() {
+        java.lang.Object ref = serviceName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          serviceName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string service_name = 1;</code>
+       * @return The bytes for serviceName.
+       */
+      public com.google.protobuf.ByteString
+          getServiceNameBytes() {
+        java.lang.Object ref = serviceName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          serviceName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string service_name = 1;</code>
+       * @param value The serviceName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setServiceName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        serviceName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string service_name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearServiceName() {
+        serviceName_ = getDefaultInstance().getServiceName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string service_name = 1;</code>
+       * @param value The bytes for serviceName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setServiceNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        serviceName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:protocol.PacketAttachScreen)
+    }
+
+    // @@protoc_insertion_point(class_scope:protocol.PacketAttachScreen)
+    private static final eu.novusmc.athena.common.Protocol.PacketAttachScreen DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new eu.novusmc.athena.common.Protocol.PacketAttachScreen();
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketAttachScreen getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<PacketAttachScreen>
+        PARSER = new com.google.protobuf.AbstractParser<PacketAttachScreen>() {
+      @java.lang.Override
+      public PacketAttachScreen parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<PacketAttachScreen> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PacketAttachScreen> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public eu.novusmc.athena.common.Protocol.PacketAttachScreen getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface PacketDetachScreenOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:protocol.PacketDetachScreen)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string service_name = 1;</code>
+     * @return The serviceName.
+     */
+    java.lang.String getServiceName();
+    /**
+     * <code>string service_name = 1;</code>
+     * @return The bytes for serviceName.
+     */
+    com.google.protobuf.ByteString
+        getServiceNameBytes();
+  }
+  /**
+   * Protobuf type {@code protocol.PacketDetachScreen}
+   */
+  public static final class PacketDetachScreen extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:protocol.PacketDetachScreen)
+      PacketDetachScreenOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 29,
+        /* patch= */ 1,
+        /* suffix= */ "",
+        PacketDetachScreen.class.getName());
+    }
+    // Use PacketDetachScreen.newBuilder() to construct.
+    private PacketDetachScreen(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private PacketDetachScreen() {
+      serviceName_ = "";
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketDetachScreen_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketDetachScreen_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              eu.novusmc.athena.common.Protocol.PacketDetachScreen.class, eu.novusmc.athena.common.Protocol.PacketDetachScreen.Builder.class);
+    }
+
+    public static final int SERVICE_NAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object serviceName_ = "";
+    /**
+     * <code>string service_name = 1;</code>
+     * @return The serviceName.
+     */
+    @java.lang.Override
+    public java.lang.String getServiceName() {
+      java.lang.Object ref = serviceName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        serviceName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string service_name = 1;</code>
+     * @return The bytes for serviceName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getServiceNameBytes() {
+      java.lang.Object ref = serviceName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        serviceName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(serviceName_)) {
+        com.google.protobuf.GeneratedMessage.writeString(output, 1, serviceName_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(serviceName_)) {
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(1, serviceName_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof eu.novusmc.athena.common.Protocol.PacketDetachScreen)) {
+        return super.equals(obj);
+      }
+      eu.novusmc.athena.common.Protocol.PacketDetachScreen other = (eu.novusmc.athena.common.Protocol.PacketDetachScreen) obj;
+
+      if (!getServiceName()
+          .equals(other.getServiceName())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + SERVICE_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getServiceName().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketDetachScreen parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketDetachScreen parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketDetachScreen parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketDetachScreen parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketDetachScreen parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketDetachScreen parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketDetachScreen parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketDetachScreen parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketDetachScreen parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketDetachScreen parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketDetachScreen parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketDetachScreen parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(eu.novusmc.athena.common.Protocol.PacketDetachScreen prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code protocol.PacketDetachScreen}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:protocol.PacketDetachScreen)
+        eu.novusmc.athena.common.Protocol.PacketDetachScreenOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketDetachScreen_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketDetachScreen_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                eu.novusmc.athena.common.Protocol.PacketDetachScreen.class, eu.novusmc.athena.common.Protocol.PacketDetachScreen.Builder.class);
+      }
+
+      // Construct using eu.novusmc.athena.common.Protocol.PacketDetachScreen.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        serviceName_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketDetachScreen_descriptor;
+      }
+
+      @java.lang.Override
+      public eu.novusmc.athena.common.Protocol.PacketDetachScreen getDefaultInstanceForType() {
+        return eu.novusmc.athena.common.Protocol.PacketDetachScreen.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public eu.novusmc.athena.common.Protocol.PacketDetachScreen build() {
+        eu.novusmc.athena.common.Protocol.PacketDetachScreen result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public eu.novusmc.athena.common.Protocol.PacketDetachScreen buildPartial() {
+        eu.novusmc.athena.common.Protocol.PacketDetachScreen result = new eu.novusmc.athena.common.Protocol.PacketDetachScreen(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(eu.novusmc.athena.common.Protocol.PacketDetachScreen result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.serviceName_ = serviceName_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof eu.novusmc.athena.common.Protocol.PacketDetachScreen) {
+          return mergeFrom((eu.novusmc.athena.common.Protocol.PacketDetachScreen)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(eu.novusmc.athena.common.Protocol.PacketDetachScreen other) {
+        if (other == eu.novusmc.athena.common.Protocol.PacketDetachScreen.getDefaultInstance()) return this;
+        if (!other.getServiceName().isEmpty()) {
+          serviceName_ = other.serviceName_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                serviceName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object serviceName_ = "";
+      /**
+       * <code>string service_name = 1;</code>
+       * @return The serviceName.
+       */
+      public java.lang.String getServiceName() {
+        java.lang.Object ref = serviceName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          serviceName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string service_name = 1;</code>
+       * @return The bytes for serviceName.
+       */
+      public com.google.protobuf.ByteString
+          getServiceNameBytes() {
+        java.lang.Object ref = serviceName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          serviceName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string service_name = 1;</code>
+       * @param value The serviceName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setServiceName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        serviceName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string service_name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearServiceName() {
+        serviceName_ = getDefaultInstance().getServiceName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string service_name = 1;</code>
+       * @param value The bytes for serviceName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setServiceNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        serviceName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:protocol.PacketDetachScreen)
+    }
+
+    // @@protoc_insertion_point(class_scope:protocol.PacketDetachScreen)
+    private static final eu.novusmc.athena.common.Protocol.PacketDetachScreen DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new eu.novusmc.athena.common.Protocol.PacketDetachScreen();
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketDetachScreen getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<PacketDetachScreen>
+        PARSER = new com.google.protobuf.AbstractParser<PacketDetachScreen>() {
+      @java.lang.Override
+      public PacketDetachScreen parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<PacketDetachScreen> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PacketDetachScreen> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public eu.novusmc.athena.common.Protocol.PacketDetachScreen getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface PacketExecuteServiceCommandOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:protocol.PacketExecuteServiceCommand)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string service_name = 1;</code>
+     * @return The serviceName.
+     */
+    java.lang.String getServiceName();
+    /**
+     * <code>string service_name = 1;</code>
+     * @return The bytes for serviceName.
+     */
+    com.google.protobuf.ByteString
+        getServiceNameBytes();
+
+    /**
+     * <code>string command = 2;</code>
+     * @return The command.
+     */
+    java.lang.String getCommand();
+    /**
+     * <code>string command = 2;</code>
+     * @return The bytes for command.
+     */
+    com.google.protobuf.ByteString
+        getCommandBytes();
+  }
+  /**
+   * Protobuf type {@code protocol.PacketExecuteServiceCommand}
+   */
+  public static final class PacketExecuteServiceCommand extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:protocol.PacketExecuteServiceCommand)
+      PacketExecuteServiceCommandOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 29,
+        /* patch= */ 1,
+        /* suffix= */ "",
+        PacketExecuteServiceCommand.class.getName());
+    }
+    // Use PacketExecuteServiceCommand.newBuilder() to construct.
+    private PacketExecuteServiceCommand(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private PacketExecuteServiceCommand() {
+      serviceName_ = "";
+      command_ = "";
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketExecuteServiceCommand_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketExecuteServiceCommand_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand.class, eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand.Builder.class);
+    }
+
+    public static final int SERVICE_NAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object serviceName_ = "";
+    /**
+     * <code>string service_name = 1;</code>
+     * @return The serviceName.
+     */
+    @java.lang.Override
+    public java.lang.String getServiceName() {
+      java.lang.Object ref = serviceName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        serviceName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string service_name = 1;</code>
+     * @return The bytes for serviceName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getServiceNameBytes() {
+      java.lang.Object ref = serviceName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        serviceName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int COMMAND_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object command_ = "";
+    /**
+     * <code>string command = 2;</code>
+     * @return The command.
+     */
+    @java.lang.Override
+    public java.lang.String getCommand() {
+      java.lang.Object ref = command_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        command_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string command = 2;</code>
+     * @return The bytes for command.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCommandBytes() {
+      java.lang.Object ref = command_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        command_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(serviceName_)) {
+        com.google.protobuf.GeneratedMessage.writeString(output, 1, serviceName_);
+      }
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(command_)) {
+        com.google.protobuf.GeneratedMessage.writeString(output, 2, command_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(serviceName_)) {
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(1, serviceName_);
+      }
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(command_)) {
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(2, command_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand)) {
+        return super.equals(obj);
+      }
+      eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand other = (eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand) obj;
+
+      if (!getServiceName()
+          .equals(other.getServiceName())) return false;
+      if (!getCommand()
+          .equals(other.getCommand())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + SERVICE_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getServiceName().hashCode();
+      hash = (37 * hash) + COMMAND_FIELD_NUMBER;
+      hash = (53 * hash) + getCommand().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code protocol.PacketExecuteServiceCommand}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:protocol.PacketExecuteServiceCommand)
+        eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommandOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketExecuteServiceCommand_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketExecuteServiceCommand_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand.class, eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand.Builder.class);
+      }
+
+      // Construct using eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        serviceName_ = "";
+        command_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return eu.novusmc.athena.common.Protocol.internal_static_protocol_PacketExecuteServiceCommand_descriptor;
+      }
+
+      @java.lang.Override
+      public eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand getDefaultInstanceForType() {
+        return eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand build() {
+        eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand buildPartial() {
+        eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand result = new eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.serviceName_ = serviceName_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.command_ = command_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand) {
+          return mergeFrom((eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand other) {
+        if (other == eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand.getDefaultInstance()) return this;
+        if (!other.getServiceName().isEmpty()) {
+          serviceName_ = other.serviceName_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getCommand().isEmpty()) {
+          command_ = other.command_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                serviceName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                command_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object serviceName_ = "";
+      /**
+       * <code>string service_name = 1;</code>
+       * @return The serviceName.
+       */
+      public java.lang.String getServiceName() {
+        java.lang.Object ref = serviceName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          serviceName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string service_name = 1;</code>
+       * @return The bytes for serviceName.
+       */
+      public com.google.protobuf.ByteString
+          getServiceNameBytes() {
+        java.lang.Object ref = serviceName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          serviceName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string service_name = 1;</code>
+       * @param value The serviceName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setServiceName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        serviceName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string service_name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearServiceName() {
+        serviceName_ = getDefaultInstance().getServiceName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string service_name = 1;</code>
+       * @param value The bytes for serviceName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setServiceNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        serviceName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object command_ = "";
+      /**
+       * <code>string command = 2;</code>
+       * @return The command.
+       */
+      public java.lang.String getCommand() {
+        java.lang.Object ref = command_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          command_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string command = 2;</code>
+       * @return The bytes for command.
+       */
+      public com.google.protobuf.ByteString
+          getCommandBytes() {
+        java.lang.Object ref = command_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          command_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string command = 2;</code>
+       * @param value The command to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCommand(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        command_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string command = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCommand() {
+        command_ = getDefaultInstance().getCommand();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string command = 2;</code>
+       * @param value The bytes for command to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCommandBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        command_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:protocol.PacketExecuteServiceCommand)
+    }
+
+    // @@protoc_insertion_point(class_scope:protocol.PacketExecuteServiceCommand)
+    private static final eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand();
+    }
+
+    public static eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<PacketExecuteServiceCommand>
+        PARSER = new com.google.protobuf.AbstractParser<PacketExecuteServiceCommand>() {
+      @java.lang.Override
+      public PacketExecuteServiceCommand parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<PacketExecuteServiceCommand> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PacketExecuteServiceCommand> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public eu.novusmc.athena.common.Protocol.PacketExecuteServiceCommand getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_protocol_Service_descriptor;
   private static final 
@@ -10105,6 +12293,26 @@ public final class Protocol {
   private static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_protocol_PacketProxyUnregisterServer_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_protocol_PacketScreenLine_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_protocol_PacketScreenLine_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_protocol_PacketAttachScreen_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_protocol_PacketAttachScreen_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_protocol_PacketDetachScreen_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_protocol_PacketDetachScreen_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_protocol_PacketExecuteServiceCommand_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_protocol_PacketExecuteServiceCommand_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -10146,8 +12354,13 @@ public final class Protocol {
       "(\t\"L\n\031PacketProxyRegisterServer\022\023\n\013serve" +
       "r_name\030\001 \001(\t\022\014\n\004host\030\002 \001(\t\022\014\n\004port\030\003 \001(\005" +
       "\"2\n\033PacketProxyUnregisterServer\022\023\n\013serve" +
-      "r_name\030\001 \001(\tB%\n\030eu.novusmc.athena.common" +
-      "Z\tprotocol/b\006proto3"
+      "r_name\030\001 \001(\t\" \n\020PacketScreenLine\022\014\n\004line" +
+      "\030\001 \001(\t\"*\n\022PacketAttachScreen\022\024\n\014service_" +
+      "name\030\001 \001(\t\"*\n\022PacketDetachScreen\022\024\n\014serv" +
+      "ice_name\030\001 \001(\t\"D\n\033PacketExecuteServiceCo" +
+      "mmand\022\024\n\014service_name\030\001 \001(\t\022\017\n\007command\030\002" +
+      " \001(\tB%\n\030eu.novusmc.athena.commonZ\tprotoc" +
+      "ol/b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -10244,6 +12457,30 @@ public final class Protocol {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_protocol_PacketProxyUnregisterServer_descriptor,
         new java.lang.String[] { "ServerName", });
+    internal_static_protocol_PacketScreenLine_descriptor =
+      getDescriptor().getMessageTypes().get(15);
+    internal_static_protocol_PacketScreenLine_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_protocol_PacketScreenLine_descriptor,
+        new java.lang.String[] { "Line", });
+    internal_static_protocol_PacketAttachScreen_descriptor =
+      getDescriptor().getMessageTypes().get(16);
+    internal_static_protocol_PacketAttachScreen_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_protocol_PacketAttachScreen_descriptor,
+        new java.lang.String[] { "ServiceName", });
+    internal_static_protocol_PacketDetachScreen_descriptor =
+      getDescriptor().getMessageTypes().get(17);
+    internal_static_protocol_PacketDetachScreen_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_protocol_PacketDetachScreen_descriptor,
+        new java.lang.String[] { "ServiceName", });
+    internal_static_protocol_PacketExecuteServiceCommand_descriptor =
+      getDescriptor().getMessageTypes().get(18);
+    internal_static_protocol_PacketExecuteServiceCommand_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_protocol_PacketExecuteServiceCommand_descriptor,
+        new java.lang.String[] { "ServiceName", "Command", });
     descriptor.resolveAllFeaturesImmutable();
     com.google.protobuf.AnyProto.getDescriptor();
   }
