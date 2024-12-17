@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,10 +31,14 @@ jobs:
 
       - name: Create gradle.properties
         run: |
-          cat <<EOF
+          cat <<EOF >> plugin/gradle.properties
           github_actor=${{ github.actor }}
           github_token=${{ secrets.GITHUB_TOKEN }}
-          EOF > $HOME/.gradle/gradle.properties
+          EOF
+
+      - name: Check
+        run: cat plugin/gradle.properties
 
       - name: Build
-        run: make all
+        run: ./gradlew build --info
+        working-directory: plugin
