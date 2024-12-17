@@ -33,7 +33,7 @@ type config struct {
 
 func main() {
 	fmt.Println(color.RedString(strings.TrimPrefix(common.Header, "\n")))
-	log.SetPrefix(color.WhiteString("[master] "))
+	log.SetPrefix(color.RedString("[master] "))
 	log.Printf("starting Athena-Master %s", common.Version)
 
 	var (

@@ -167,11 +167,20 @@ func (svcm *serviceManager) startService(svc *service) error {
 		return fmt.Errorf("failed to get absolute path: %w", err)
 	}
 
-	outReader, outWriter := io.Pipe()
-	inReader, inWriter := io.Pipe()
-	scanner := bufio.NewReader(outReader)
-	sc := svc.sc
-	go func() {
+	outReader, err := svc.cmd.StdoutPipe()
+	if err != nil {
+		return fmt.Errorf("failed to get stdout pipe: %w", err)
+	}
+	svc.cmd.Stderr = svc.cmd.Stdout
+
+	inWriter, err := svc.cmd.StdinPipe()
+	if err != nil {
+		return fmt.Errorf("failed to get stdin pipe: %w", err)
+	}
+	svc.w = inWriter
+
+	go func(sc *screen, outReader io.ReadCloser) {
+		scanner := bufio.NewReader(outReader)
 		for {
 			line, _, err := scanner.ReadLine()
 			if err != nil {
@@ -195,11 +204,8 @@ func (svcm *serviceManager) startService(svc *service) error {
 			}
 			sc.mu.Unlock()
 		}
-	}()
-	svc.cmd.Stdin = inReader
-	svc.cmd.Stdout = outWriter
-	svc.cmd.Stderr = outWriter
-	svc.w = inWriter
+	}(svc.sc, outReader)
+
 	err = svc.cmd.Start()
 	if err != nil {
 		return fmt.Errorf("failed to start service: %w", err)
@@ -207,11 +213,6 @@ func (svcm *serviceManager) startService(svc *service) error {
 
 	go func() {
 		err := svc.cmd.Wait()
-		// close pipes
-		_ = outReader.Close()
-		_ = outWriter.Close()
-		_ = inReader.Close()
-		_ = inWriter.Close()
 		if err != nil && err.Error() != "exit status 143" { // 143: exited by SIGTERM
 			log.Printf("service %s exited with error: %v", svc.Name, err)
 		} else {

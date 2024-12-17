@@ -35,8 +35,8 @@ type config struct {
 }
 
 func main() {
-	fmt.Println(color.RedString(strings.TrimPrefix(common.Header, "\n")))
-	log.SetPrefix(color.WhiteString("[slave] "))
+	fmt.Println(color.YellowString(strings.TrimPrefix(common.Header, "\n")))
+	log.SetPrefix(color.YellowString("[slave] "))
 	log.Printf("starting Athena-Slave %s", common.Version)
 
 	var (
