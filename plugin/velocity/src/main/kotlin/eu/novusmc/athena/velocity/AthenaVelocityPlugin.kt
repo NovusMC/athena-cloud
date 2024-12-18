@@ -22,7 +22,7 @@ import org.slf4j.Logger
 
 @Plugin(
     id = "athena",
-    version = "0.1.0", // x-release-please-version
+    version = "1.0.0", // x-release-please-version
     dependencies = [Dependency(id = "kotlin-stdlib")],
 )
 class AthenaVelocityPlugin
