@@ -1,7 +1,7 @@
 package common
 
 const (
-	Version = "v0.0.0"
+	Version = "v0.0.0" // x-release-please-version
 
 	Header = `
      ___   .___________. __    __   _______ .__   __.      ___      

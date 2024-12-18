@@ -22,3 +22,5 @@ func DeleteItem[S comparable](s []S, i S) []S {
 	}
 	return s
 }
+
+//
