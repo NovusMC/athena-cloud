@@ -9,7 +9,7 @@ require (
 	github.com/goccy/go-yaml v1.15.9
 	github.com/gokrazy/rsync v0.1.0
 	github.com/urfave/cli/v3 v3.0.0-beta1
-	google.golang.org/protobuf v1.35.2
+	google.golang.org/protobuf v1.36.0
 	protocol v0.0.0
 )
 

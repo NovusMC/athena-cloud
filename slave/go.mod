@@ -5,7 +5,7 @@ go 1.23.2
 require (
 	common v0.0.0
 	github.com/fatih/color v1.18.0
-	google.golang.org/protobuf v1.35.2
+	google.golang.org/protobuf v1.36.0
 	protocol v0.0.0
 )
 
