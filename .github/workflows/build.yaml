@@ -8,9 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,20 +22,17 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+          cache: gradle
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
       - name: Create gradle.properties
         run: |
-          cat <<EOF >> plugin/gradle.properties
-          github_actor=${{ github.actor }}
-          github_token=${{ secrets.GITHUB_TOKEN }}
+          cat <<EOF >> $HOME/.gradle/gradle.properties
+          github_actor=${{ secrets.GRADLE_GITHUB_ACTOR }}
+          github_token=${{ secrets.GRADLE_GITHUB_TOKEN }}
           EOF
 
-      - name: Check
-        run: cat plugin/gradle.properties
-
       - name: Build
-        run: ./gradlew build --info
-        working-directory: plugin
+        run: make all
