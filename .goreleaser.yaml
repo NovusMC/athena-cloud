@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+
+version: 2
+
+before:
+  hooks:
+    - make plugin
+
+builds:
+  - id: master
+    dir: ./master
+    binary: master
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - arm64
+      - amd64
+
+  - id: slave
+    dir: ./slave
+    binary: slave
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - arm64
+      - amd64
+
+archives:
+  - id: athena
+    builds:
+      - master
+      - slave
+    name_template: "athena-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
