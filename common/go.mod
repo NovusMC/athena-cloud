@@ -4,7 +4,7 @@ go 1.23.2
 
 require (
 	github.com/fatih/color v1.18.0
-	github.com/goccy/go-yaml v1.15.9
+	github.com/goccy/go-yaml v1.15.11
 )
 
 require (
