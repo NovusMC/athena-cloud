@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "include-component-in-tag": false,
+  "include-v-in-tag": false,
+  "packages": {
+    ".": {
+      "extra-files": [
+        "common/constants.go",
+        "plugin/build.gradle.kts",
+        "plugin/velocity/src/main/kotlin/eu/novusmc/athena/velocity/AthenaVelocityPlugin.kt",
+        "plugin/paper/src/main/kotlin/eu/novusmc/athena/paper/AthenaPaperPlugin.kt"
+      ]
+    }
+  }
+}
