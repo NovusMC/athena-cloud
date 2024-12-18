@@ -20,7 +20,11 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import org.slf4j.Logger
 
-@Plugin(id = "athena", version = "0.1.0", dependencies = [Dependency(id = "kotlin-stdlib")])
+@Plugin(
+    id = "athena",
+    version = "0.1.0", // x-release-please-version
+    dependencies = [Dependency(id = "kotlin-stdlib")],
+)
 class AthenaVelocityPlugin
 @Inject
 constructor(private val server: ProxyServer, private val logger: Logger) {
