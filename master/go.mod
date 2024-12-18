@@ -6,7 +6,7 @@ require (
 	common v0.0.0
 	github.com/ergochat/readline v0.1.3
 	github.com/fatih/color v1.18.0
-	github.com/goccy/go-yaml v1.15.9
+	github.com/goccy/go-yaml v1.15.11
 	github.com/gokrazy/rsync v0.1.0
 	github.com/urfave/cli/v3 v3.0.0-beta1
 	google.golang.org/protobuf v1.35.2
