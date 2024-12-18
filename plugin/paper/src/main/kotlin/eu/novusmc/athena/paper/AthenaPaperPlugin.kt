@@ -14,7 +14,7 @@ import org.bukkit.plugin.java.annotation.plugin.Plugin
 
 @Plugin(
     name = "athena",
-    version = "0.1.0", // x-release-please-version
+    version = "0.2.0", // x-release-please-version
 )
 @ApiVersion(ApiVersion.Target.v1_20)
 @Dependency("kotlin-stdlib")
