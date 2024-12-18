@@ -25,6 +25,7 @@ func newCli(ch chan<- any, m *master) *cli.Command {
 				Usage: "Shut down master",
 				Action: func(ctx context.Context, command *cli.Command) error {
 					go func() {
+						defer recoverPanic()
 						ch <- masterShutdownCmd{}
 					}()
 					return nil

@@ -1,3 +1,4 @@
 slave.yaml
 template_cache/
 tmp/
+logs/

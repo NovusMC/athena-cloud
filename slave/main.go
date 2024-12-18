@@ -8,7 +8,9 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
 	"protocol"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -35,14 +37,27 @@ type config struct {
 }
 
 func main() {
-	fmt.Println(color.YellowString(strings.TrimPrefix(common.Header, "\n")))
+	err := os.MkdirAll("logs", 0755)
+	if err != nil {
+		panic(err)
+	}
+
+	logFile, err := os.OpenFile("logs/slave.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = logFile.Close()
+	}()
+
+	defer recoverPanic()
+
+	log.SetOutput(io.MultiWriter(os.Stdout, common.NewStripAnsiWriter(logFile)))
+	log.Println(color.YellowString(common.Header))
 	log.SetPrefix(color.YellowString("[slave] "))
 	log.Printf("starting Athena-Slave %s", common.Version)
 
-	var (
-		err error
-		s   slave
-	)
+	var s slave
 
 	err = checkForRsync()
 	if err != nil {
@@ -92,6 +107,7 @@ func main() {
 	}
 
 	go func() {
+		defer recoverPanic()
 		time.Sleep(10 * time.Second)
 		if !s.authenticated {
 			log.Println("authentication with master timed out")
@@ -243,6 +259,7 @@ func (s *slave) handlePacket(p proto.Message) error {
 }
 
 func handleMasterConnection(ch chan<- any, conn net.Conn) {
+	defer recoverPanic()
 	for {
 		p, err := protocol.ReadPacket(conn)
 		if err != nil {
@@ -260,4 +277,16 @@ func handleMasterConnection(ch chan<- any, conn net.Conn) {
 		}
 	}
 	ch <- slaveDisconnectCmd{}
+}
+
+func recoverPanic() {
+	if r := recover(); r != nil {
+		stack := string(debug.Stack())
+		linesToSkip := 4
+		if strings.HasPrefix(stack, "goroutine") {
+			linesToSkip++
+		}
+		stack = strings.Join(strings.Split(stack, "\n")[linesToSkip:], "\n")
+		log.Fatalf("panic: %v\n%s", r, stack)
+	}
 }

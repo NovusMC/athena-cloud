@@ -180,6 +180,7 @@ func (svcm *serviceManager) startService(svc *service) error {
 	svc.w = inWriter
 
 	go func(sc *screen, outReader io.ReadCloser) {
+		defer recoverPanic()
 		scanner := bufio.NewReader(outReader)
 		for {
 			line, _, err := scanner.ReadLine()
@@ -212,6 +213,7 @@ func (svcm *serviceManager) startService(svc *service) error {
 	}
 
 	go func() {
+		defer recoverPanic()
 		err := svc.cmd.Wait()
 		if err != nil && err.Error() != "exit status 143" { // 143: exited by SIGTERM
 			log.Printf("service %s exited with error: %v", svc.Name, err)
@@ -234,6 +236,7 @@ func (svcm *serviceManager) stopService(svc *service) error {
 	}
 	proc := svc.cmd.Process
 	go func() {
+		defer recoverPanic()
 		time.Sleep(20 * time.Second)
 		_ = proc.Kill()
 	}()
@@ -287,6 +290,7 @@ func (svcm *serviceManager) checkPort(host string, port int32) bool {
 }
 
 func handleServiceConnection(ch chan<- any, lis net.Listener) {
+	defer recoverPanic()
 	for {
 		conn, err := lis.Accept()
 		if err != nil {
@@ -297,12 +301,14 @@ func handleServiceConnection(ch chan<- any, lis net.Listener) {
 		}
 		log.Printf("new connection from %s", conn.RemoteAddr())
 		go func() {
+			defer recoverPanic()
 			var svc *service
 			closed := false
 			defer func() {
 				closed = true
 			}()
 			go func() {
+				defer recoverPanic()
 				time.Sleep(10 * time.Second)
 				if svc == nil && !closed {
 					closed = true
