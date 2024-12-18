@@ -190,6 +190,8 @@ func (sm *slaveManager) getSlave(name string) *slave {
 }
 
 func handleSlaveConnection(ch chan<- any, lis net.Listener) {
+	defer recoverPanic()
+
 	for {
 		conn, err := lis.Accept()
 		if err != nil {
@@ -203,6 +205,7 @@ func handleSlaveConnection(ch chan<- any, lis net.Listener) {
 		ch <- createSlaveCmd{conn: conn, slvCh: slvCh}
 		slv := <-slvCh
 		go func() {
+			defer recoverPanic()
 			for {
 				p, err := protocol.ReadPacket(conn)
 				if err != nil {

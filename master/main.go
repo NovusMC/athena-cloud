@@ -1,13 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"github.com/ergochat/readline"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v3"
 	"io"
 	"log"
 	"net"
+	"os"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -32,15 +33,42 @@ type config struct {
 }
 
 func main() {
-	fmt.Println(color.RedString(strings.TrimPrefix(common.Header, "\n")))
+	err := os.MkdirAll("logs", 0755)
+	if err != nil {
+		panic(err)
+	}
+
+	logFile, err := os.OpenFile("logs/master.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = logFile.Close()
+	}()
+
+	defer recoverPanic()
+
+	l, err := readline.NewEx(&readline.Config{
+		Prompt:            "\033[31m»\033[0m ",
+		HistoryFile:       ".athena_history",
+		HistorySearchFold: true,
+	})
+	if err != nil {
+		log.Fatalf("failed starting readline: %v", err)
+	}
+	l.CaptureExitSignal()
+	defer func() {
+		_ = l.Close()
+	}()
+
+	outWriter := io.MultiWriter(l.Stderr(), common.NewStripAnsiWriter(logFile))
+	log.SetOutput(outWriter)
+
 	log.SetPrefix(color.RedString("[master] "))
+	log.Println(color.RedString(common.Header))
 	log.Printf("starting Athena-Master %s", common.Version)
 
-	var (
-		err error
-		m   master
-	)
-
+	m := master{term: outWriter}
 	ch := make(chan any)
 
 	m.cfg, err = common.ReadConfig("master.yaml", config{
@@ -83,29 +111,16 @@ func main() {
 	go handleSlaveConnection(ch, lis)
 
 	go func() {
+		defer recoverPanic()
 		t := time.NewTicker(time.Second)
 		for range t.C {
 			ch <- scheduleServicesCmd{}
 		}
 	}()
 
-	l, err := readline.NewEx(&readline.Config{
-		Prompt:            "\033[31m»\033[0m ",
-		HistoryFile:       ".athena_history",
-		HistorySearchFold: true,
-	})
-	if err != nil {
-		log.Fatalf("failed starting readline: %v", err)
-	}
-	l.CaptureExitSignal()
-	log.SetOutput(l.Stderr())
-	m.term = l.Stderr()
-	defer func() {
-		_ = l.Close()
-	}()
-
 	running := true
 	go func() {
+		defer recoverPanic()
 		for running {
 			line, _ := l.Readline()
 			line = strings.TrimSpace(line)
@@ -122,4 +137,16 @@ func main() {
 	running = false
 
 	log.Printf("shutting down")
+}
+
+func recoverPanic() {
+	if r := recover(); r != nil {
+		stack := string(debug.Stack())
+		linesToSkip := 4
+		if strings.HasPrefix(stack, "goroutine") {
+			linesToSkip++
+		}
+		stack = strings.Join(strings.Split(stack, "\n")[linesToSkip:], "\n")
+		log.Fatalf("panic: %v\n%s", r, stack)
+	}
 }

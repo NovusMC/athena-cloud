@@ -98,6 +98,7 @@ func (tmpl *templateManager) startFileServer() error {
 	log.Printf("started file server on %s\n", tmpl.m.cfg.FileServerBindAddr)
 
 	go func() {
+		defer recoverPanic()
 		err := srv.Serve(context.Background(), lis)
 		if err != nil {
 			fmt.Printf("failed to serve file server: %v\n", err)

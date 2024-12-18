@@ -10,7 +10,8 @@ require (
 )
 
 require (
-	github.com/goccy/go-yaml v1.15.9 // indirect
+	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
+	github.com/goccy/go-yaml v1.15.11 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	golang.org/x/sys v0.26.0 // indirect
