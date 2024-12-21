@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/NovusMC/athena-cloud/compare/v0.2.1...v0.2.2) (2024-12-21)
+
+
+### Bug Fixes
+
+* stop service if is pending ([#21](https://github.com/NovusMC/athena-cloud/issues/21)) ([0e7b02c](https://github.com/NovusMC/athena-cloud/commit/0e7b02c1348d37783988d3bb88d31bf73c4583da))
+
 ## [0.2.1](https://github.com/NovusMC/athena-cloud/compare/v0.2.0...v0.2.1) (2024-12-21)
 
 
