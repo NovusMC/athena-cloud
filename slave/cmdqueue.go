@@ -8,6 +8,8 @@ import (
 	"protocol"
 )
 
+type interruptCmd struct{}
+
 type slaveDisconnectCmd struct{}
 
 type handleMasterPacketCmd struct {
@@ -78,6 +80,10 @@ loop:
 				}
 			}
 		case slaveDisconnectCmd:
+			break loop
+		case interruptCmd:
+			log.Printf("received interrupt, exiting cleanly")
+			_ = s.conn.Close()
 			break loop
 		default:
 			panic(fmt.Sprintf("unknown command type %T", cmd))
