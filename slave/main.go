@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"github.com/fatih/color"
 	"google.golang.org/protobuf/proto"
@@ -272,9 +271,7 @@ func handleMasterConnection(ch chan<- any, conn net.Conn) {
 	for {
 		p, err := protocol.ReadPacket(conn)
 		if err != nil {
-			if !errors.Is(err, io.EOF) {
-				log.Printf("failed to read packet: %v", err)
-			}
+			log.Printf("failed to read packet: %v", err)
 			break
 		}
 		errCh := make(chan error)

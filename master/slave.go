@@ -2,11 +2,9 @@ package main
 
 import (
 	"common"
-	"errors"
 	"fmt"
 	"github.com/fatih/color"
 	"google.golang.org/protobuf/proto"
-	"io"
 	"log"
 	"net"
 	"protocol"
@@ -195,9 +193,7 @@ func handleSlaveConnection(ch chan<- any, lis net.Listener) {
 	for {
 		conn, err := lis.Accept()
 		if err != nil {
-			if !errors.Is(err, net.ErrClosed) {
-				log.Printf("connection error: %v", err)
-			}
+			log.Printf("connection error: %v", err)
 			break
 		}
 		log.Printf("new connection from %s", conn.RemoteAddr())
@@ -209,9 +205,7 @@ func handleSlaveConnection(ch chan<- any, lis net.Listener) {
 			for {
 				p, err := protocol.ReadPacket(conn)
 				if err != nil {
-					if !errors.Is(err, io.EOF) {
-						log.Printf("failed reading packet: %v", err)
-					}
+					log.Printf("failed reading packet: %v", err)
 					break
 				}
 				errCh := make(chan error)

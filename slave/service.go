@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"common"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"google.golang.org/protobuf/proto"
 	"io"
@@ -185,9 +184,7 @@ func (svcm *serviceManager) startService(svc *service) error {
 		for {
 			line, _, err := scanner.ReadLine()
 			if err != nil {
-				if !errors.Is(err, io.EOF) {
-					log.Printf("failed to read line: %v", err)
-				}
+				log.Printf("failed to read line: %v", err)
 				break
 			}
 			sc.mu.Lock()
@@ -294,9 +291,7 @@ func handleServiceConnection(ch chan<- any, lis net.Listener) {
 	for {
 		conn, err := lis.Accept()
 		if err != nil {
-			if !errors.Is(err, net.ErrClosed) {
-				log.Printf("connection error: %v", err)
-			}
+			log.Printf("connection error: %v", err)
 			break
 		}
 		log.Printf("new connection from %s", conn.RemoteAddr())
@@ -339,9 +334,7 @@ func handleServiceConnection(ch chan<- any, lis net.Listener) {
 			for {
 				p, err := protocol.ReadPacket(conn)
 				if err != nil {
-					if !errors.Is(err, io.EOF) {
-						log.Printf("failed reading packet: %v", err)
-					}
+					log.Printf("failed reading packet: %v", err)
 					break
 				}
 				errCh := make(chan error)
