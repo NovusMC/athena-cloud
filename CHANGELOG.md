@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.1](https://github.com/NovusMC/athena-cloud/compare/v0.2.0...v0.2.1) (2024-12-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency com.google.protobuf:protobuf-java to v4.29.2 ([#7](https://github.com/NovusMC/athena-cloud/issues/7)) ([0e01834](https://github.com/NovusMC/athena-cloud/commit/0e01834166e1e103db5262c6b87eaeb4ec70ac9d))
+* **deps:** update module github.com/goccy/go-yaml to v1.15.12 ([#16](https://github.com/NovusMC/athena-cloud/issues/16)) ([b35318f](https://github.com/NovusMC/athena-cloud/commit/b35318f419dcd34a25dca78de0f53148c94fb949))
+* exit slave cleanly on interrupt ([#18](https://github.com/NovusMC/athena-cloud/issues/18)) ([045969d](https://github.com/NovusMC/athena-cloud/commit/045969db533dfe13ddff3ff7f6fd4f7ffa23a75f))
+* print all connection errors ([#20](https://github.com/NovusMC/athena-cloud/issues/20)) ([f32c493](https://github.com/NovusMC/athena-cloud/commit/f32c4932281d3c94c47f0b5f2a52067ab9c1537f))
+
 ## [0.2.0](https://github.com/NovusMC/athena-cloud/compare/v0.1.0...v0.2.0) (2024-12-18)
 
 
