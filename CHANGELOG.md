@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/NovusMC/athena-cloud/compare/v0.2.2...v0.2.3) (2024-12-21)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/goccy/go-yaml to v1.15.13 ([#23](https://github.com/NovusMC/athena-cloud/issues/23)) ([7f393ec](https://github.com/NovusMC/athena-cloud/commit/7f393ec8d229803643cb5c5fa81c63de9ac62b2a))
+
 ## [0.2.2](https://github.com/NovusMC/athena-cloud/compare/v0.2.1...v0.2.2) (2024-12-21)
 
 
