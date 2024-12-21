@@ -41,7 +41,7 @@ func (s *scheduler) scheduleServices() {
 			}
 			toStop := svcs[g.MaxServices:]
 			for _, svc := range toStop {
-				if svc.State == protocol.Service_STATE_ONLINE {
+				if svc.State == protocol.Service_STATE_PENDING || svc.State == protocol.Service_STATE_ONLINE {
 					err := s.stopService(svc)
 					if err != nil {
 						log.Printf("failed to stop service %q: %v", svc.Name, err)
