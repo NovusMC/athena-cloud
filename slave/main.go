@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/signal"
 	"protocol"
 	"runtime/debug"
 	"strings"
@@ -125,6 +126,14 @@ func main() {
 	log.Printf("listening on %s", s.cfg.BindAddr)
 	go handleMasterConnection(ch, s.conn)
 	go handleServiceConnection(ch, lis)
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt)
+	go func() {
+		for range sigCh {
+			ch <- interruptCmd{}
+		}
+	}()
 
 	s.runCommandQueue(ch)
 
