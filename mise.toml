@@ -1,0 +1,6 @@
+[tools]
+go = "1.24.4"
+goreleaser = "v2.9.0"
+java = "21"
+protoc = "29.3"
+protoc-gen-go = "v1.36.6"
