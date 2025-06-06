@@ -75,4 +75,4 @@ jobs:
         run: git diff --exit-code
 
       - if: failure()
-        run: echo "::error::Check failed, please run 'make proto' and commit the changes.
+        run: echo "::error::Check failed, please run 'make proto' and commit the changes."
