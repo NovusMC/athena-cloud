@@ -9,14 +9,14 @@ require (
 	github.com/goccy/go-yaml v1.15.13
 	github.com/gokrazy/rsync v0.1.0
 	github.com/urfave/cli/v3 v3.0.0-beta1
-	google.golang.org/protobuf v1.36.0
+	google.golang.org/protobuf v1.36.10
 	protocol v0.0.0
 )
 
 require (
 	github.com/DavidGamba/go-getoptions v0.23.0 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mmcloughlin/md4 v0.1.1 // indirect
