@@ -8,7 +8,7 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/goccy/go-yaml v1.15.13
 	github.com/gokrazy/rsync v0.1.0
-	github.com/urfave/cli/v3 v3.0.0-beta1
+	github.com/urfave/cli/v3 v3.11.0
 	google.golang.org/protobuf v1.36.0
 	protocol v0.0.0
 )
