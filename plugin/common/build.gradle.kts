@@ -1,1 +1,1 @@
-dependencies { api("com.google.protobuf", "protobuf-java", "4.29.2") }
+dependencies { api("com.google.protobuf", "protobuf-java", "4.36.1") }
